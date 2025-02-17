@@ -242,7 +242,7 @@ export const TestRunner: React.FC = () => {
             </div>
           )}
           {testResults.length > 0 && (
-            <div className="space-y-2 mt-4">
+            <div className="space-y-2 mt-4 max-h-[50vh] overflow-y-auto">
               <h4 className="font-medium text-gray-800">Test Results</h4>
               <div className="space-y-2">
                 {testResults.map((result, index) => (
