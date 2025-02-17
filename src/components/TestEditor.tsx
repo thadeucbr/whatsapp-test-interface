@@ -242,7 +242,7 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testCase, onSave, onCanc
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-4">
+    <div className="bg-white rounded-lg shadow-lg p-4 max-h-[80vh] overflow-y-auto">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-2">
           <button onClick={onCancel} className="text-gray-600 hover:text-gray-800">
