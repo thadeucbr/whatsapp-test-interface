@@ -74,7 +74,7 @@ export const ChatPanel: React.FC = () => {
       <div className="p-4 bg-gray-50 border-b">
         <h2 className="text-lg font-semibold text-gray-800">Chat Preview</h2>
       </div>
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="overflow-y-auto p-4" style={{ height: 'calc(100vh - 150px)' }}>
         {messages.map((message) => (
           <Message key={message.id} message={message} />
         ))}
@@ -82,4 +82,6 @@ export const ChatPanel: React.FC = () => {
       </div>
     </div>
   );
+  
+  
 };
