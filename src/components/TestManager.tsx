@@ -1,7 +1,7 @@
 import React from 'react';
 import { useStore } from '../store';
-import { TestCase, TestInteraction } from '../types';
-import { Plus, Trash2, Download, Upload, Edit2 } from 'lucide-react';
+import { TestCase } from '../types';
+import { Plus, Trash2, Download, Upload, Edit2, Copy } from 'lucide-react'; // Adicionado o ícone Copy
 import { TestEditor } from './TestEditor';
 
 export const TestManager: React.FC = () => {
@@ -42,6 +42,19 @@ export const TestManager: React.FC = () => {
   const handleEdit = (testCase: TestCase) => {
     setEditingTest(testCase);
     setIsEditing(true);
+  };
+
+  const handleDuplicate = (testCase: TestCase) => {
+    // Criar uma cópia do TestCase com um novo ID e nome modificado
+    const duplicatedTestCase: TestCase = {
+      ...testCase,
+      id: Date.now().toString(),
+      name: `${testCase.name} (Copy)`, // Adiciona "(Cópia)" ao nome
+      interactions: JSON.parse(JSON.stringify(testCase.interactions)), // Deep copy das interações
+    };
+    addTestCase(duplicatedTestCase);
+    // Opcional: Abrir o editor para o teste duplicado
+    handleEdit(duplicatedTestCase);
   };
 
   const handleSave = (updatedTest: TestCase) => {
@@ -119,6 +132,13 @@ export const TestManager: React.FC = () => {
                 className="text-gray-400 hover:text-blue-500"
               >
                 <Edit2 className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => handleDuplicate(testCase)}
+                className="text-gray-400 hover:text-green-500"
+                title="Duplicar Teste"
+              >
+                <Copy className="w-4 h-4" />
               </button>
               <button
                 onClick={() => deleteTestCase(testCase.id)}
