@@ -31,7 +31,7 @@ const Message: React.FC<{ message: MessageType }> = ({ message }) => {
               : 'bg-gray-100 text-gray-800 rounded-tl-none'
           }`}
         >
-          <p className="text-sm">{message.content}</p>
+          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
           {message.options && (
             <div className="mt-2 space-y-2">
               {message.type === 'button' &&
@@ -63,25 +63,37 @@ const Message: React.FC<{ message: MessageType }> = ({ message }) => {
 
 export const ChatPanel: React.FC = () => {
   const messages = useStore((state) => state.messages);
+  const selectedPhoneNumber = useStore((state) => state.selectedPhoneNumber);
   const chatEndRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Filter messages based on selected phone number
+  const filteredMessages = React.useMemo(() => {
+    if (!selectedPhoneNumber) return [];
+    return messages.filter(
+      (msg) => msg.phoneNumber === selectedPhoneNumber
+    );
+  }, [messages, selectedPhoneNumber]);
+
   return (
     <div className="flex-1 bg-white rounded-lg shadow-lg overflow-hidden flex flex-col">
       <div className="p-4 bg-gray-50 border-b">
         <h2 className="text-lg font-semibold text-gray-800">Chat Preview</h2>
+        {selectedPhoneNumber && (
+          <p className="text-sm text-gray-600 mt-1">
+            Showing messages for: {selectedPhoneNumber}
+          </p>
+        )}
       </div>
-      <div className="overflow-y-auto p-4" style={{ height: 'calc(100vh - 150px)' }}>
-        {messages.map((message) => (
+      <div className="flex-1 overflow-y-auto p-4">
+        {filteredMessages.map((message) => (
           <Message key={message.id} message={message} />
         ))}
         <div ref={chatEndRef} />
       </div>
     </div>
   );
-  
-  
 };

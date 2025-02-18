@@ -1,7 +1,7 @@
 import { io } from 'socket.io-client';
 import { useStore } from './store';
 
-const socket = io('http://192.168.1.239:3001');
+const socket = io('https://whatsappapi.barbudas.com');
 
 socket.on('connect', () => {
   useStore.getState().setConnected(true);
@@ -14,15 +14,22 @@ socket.on('disconnect', () => {
 });
 
 socket.on('newMessage', (message) => {
-  useStore.getState().addMessage({
-    id: Date.now().toString(),
-    content: message.body.text,
-    timestamp: message.timestamp,
-    isUser: false,
-    type: message.type,
-    options: message.body.options || undefined,
-    buttonText: message.body.buttonText || undefined,
-  });
+  const store = useStore.getState();
+  const selectedPhoneNumber = store.selectedPhoneNumber;
+
+  // Only add the message if it's from the selected phone number
+  if (message.from === selectedPhoneNumber || message.to === selectedPhoneNumber) {
+    store.addMessage({
+      id: Date.now().toString(),
+      content: message.body.text,
+      timestamp: message.timestamp,
+      isUser: false,
+      type: message.type,
+      options: message.body.options || undefined,
+      buttonText: message.body.buttonText || undefined,
+      phoneNumber: message.from,
+    });
+  }
 });
 
 socket.on('pong', () => {
@@ -30,17 +37,27 @@ socket.on('pong', () => {
 });
 
 export const sendMessage = (message: string) => {
+  const store = useStore.getState();
+  const selectedPhoneNumber = store.selectedPhoneNumber;
+
+  if (!selectedPhoneNumber) {
+    console.error('No phone number selected');
+    return;
+  }
+
   const payload = {
-    to: '551126509993@c.us',
+    to: selectedPhoneNumber,
     message,
   };
+
   socket.emit('sendMessage', payload);
-  useStore.getState().addMessage({
+  store.addMessage({
     id: Date.now().toString(),
     content: message,
     timestamp: Date.now(),
     isUser: true,
     type: 'text',
+    phoneNumber: selectedPhoneNumber,
   });
 };
 

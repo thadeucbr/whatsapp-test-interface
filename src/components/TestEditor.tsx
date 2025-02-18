@@ -33,8 +33,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
       from: '551126509993@c.us',
       body: {
         text,
-        // Changed condition: buttonText should only be set when type is 'list'
-        buttonText: type === 'list' ? buttonText : null,
+        buttonText: type === 'button' ? buttonText : null,
         options: type !== 'text' ? options : null,
       },
       timestamp: Date.now(),
@@ -80,7 +79,10 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
     <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
       <div className="flex justify-between items-center">
         <h4 className="font-medium">Expected Response</h4>
-        <button onClick={onDelete} className="text-red-500 hover:text-red-700">
+        <button
+          onClick={onDelete}
+          className="text-red-500 hover:text-red-700"
+        >
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
@@ -111,8 +113,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
             placeholder="Enter message text"
           />
         </div>
-        {/* Show Button Text only for 'list' type */}
-        {type === 'list' && (
+        {type === 'button' && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Button Text
@@ -132,7 +133,10 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
               <label className="block text-sm font-medium text-gray-700">
                 {type === 'button' ? 'Buttons' : 'List Options'}
               </label>
-              <button onClick={handleOptionAdd} className="text-blue-500 hover:text-blue-700">
+              <button
+                onClick={handleOptionAdd}
+                className="text-blue-500 hover:text-blue-700"
+              >
                 <Plus className="w-4 h-4" />
               </button>
             </div>
@@ -196,7 +200,11 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
   );
 };
 
-export const TestEditor: React.FC<TestEditorProps> = ({ testCase, onSave, onCancel }) => {
+export const TestEditor: React.FC<TestEditorProps> = ({
+  testCase,
+  onSave,
+  onCancel,
+}) => {
   const [name, setName] = React.useState(testCase?.name || '');
   const [interactions, setInteractions] = React.useState<TestInteraction[]>(
     testCase?.interactions || []
@@ -242,7 +250,7 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testCase, onSave, onCanc
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-4 max-h-[80vh] overflow-y-auto">
+    <div className="bg-white rounded-lg shadow-lg p-4">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-2">
           <button onClick={onCancel} className="text-gray-600 hover:text-gray-800">

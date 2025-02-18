@@ -41,4 +41,11 @@ export interface Message {
   type: 'text' | 'button' | 'list';
   options?: Array<Row> | Array<Button>;
   buttonText?: string;
+  phoneNumber?: string;
+}
+
+export interface PhoneNumber {
+  id: string;
+  number: string;
+  name?: string;
 }
