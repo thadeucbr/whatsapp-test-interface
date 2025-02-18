@@ -33,7 +33,8 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
       from: '551126509993@c.us',
       body: {
         text,
-        buttonText: type === 'button' ? buttonText : null,
+        // Changed condition: buttonText should only be set when type is 'list'
+        buttonText: type === 'list' ? buttonText : null,
         options: type !== 'text' ? options : null,
       },
       timestamp: Date.now(),
@@ -79,10 +80,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
     <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
       <div className="flex justify-between items-center">
         <h4 className="font-medium">Expected Response</h4>
-        <button
-          onClick={onDelete}
-          className="text-red-500 hover:text-red-700"
-        >
+        <button onClick={onDelete} className="text-red-500 hover:text-red-700">
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
@@ -113,7 +111,8 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
             placeholder="Enter message text"
           />
         </div>
-        {type === 'button' && (
+        {/* Show Button Text only for 'list' type */}
+        {type === 'list' && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Button Text
@@ -133,10 +132,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
               <label className="block text-sm font-medium text-gray-700">
                 {type === 'button' ? 'Buttons' : 'List Options'}
               </label>
-              <button
-                onClick={handleOptionAdd}
-                className="text-blue-500 hover:text-blue-700"
-              >
+              <button onClick={handleOptionAdd} className="text-blue-500 hover:text-blue-700">
                 <Plus className="w-4 h-4" />
               </button>
             </div>
@@ -200,11 +196,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
   );
 };
 
-export const TestEditor: React.FC<TestEditorProps> = ({
-  testCase,
-  onSave,
-  onCancel,
-}) => {
+export const TestEditor: React.FC<TestEditorProps> = ({ testCase, onSave, onCancel }) => {
   const [name, setName] = React.useState(testCase?.name || '');
   const [interactions, setInteractions] = React.useState<TestInteraction[]>(
     testCase?.interactions || []
