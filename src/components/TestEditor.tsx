@@ -8,7 +8,7 @@ import {
   ChevronUp,
   ChevronDown,
 } from 'lucide-react';
-import { TestCase, TestInteraction, Button, Row } from '../types';
+import { TestCase, TestInteraction, Button, Row, InteractiveOption } from '../types';
 
 interface TestEditorProps {
   testCase: TestCase | null;
@@ -27,7 +27,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
   onUpdate,
   onDelete,
 }) => {
-  const [type, setType] = React.useState(
+  const [type, setType] = React.useState<ResponseType>(
     interaction.expectedResponses[0]?.type || 'text'
   );
   const [text, setText] = React.useState(
@@ -36,12 +36,12 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
   const [buttonText, setButtonText] = React.useState(
     interaction.expectedResponses[0]?.body.buttonText || ''
   );
-  const [options, setOptions] = React.useState<Array<Button | Row>>(
+  const [options, setOptions] = React.useState<Array<Button | Row | InteractiveOption>>(
     interaction.expectedResponses[0]?.body.options || []
   );
 
   const handleUpdate = () => {
-    const response = {
+    const response: Response = {
       from: '551126509993@c.us',
       body: {
         text: text.trim(),
@@ -49,7 +49,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
         options: type !== 'text' ? options : null,
       },
       timestamp: Date.now(),
-      type: type as 'text' | 'button' | 'list',
+      type: type,
     };
 
     onUpdate({
@@ -59,20 +59,29 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
     });
   };
 
-  const handleOptionAdd = () => {
-    if (type === 'button') {
-      setOptions([...options, { id: Date.now().toString(), text: '' }]);
-    } else if (type === 'list') {
-      setOptions([
-        ...options,
-        {
-          rowId: Date.now().toString(),
-          title: '',
-          description: '',
-        },
-      ]);
-    }
-  };
+const handleOptionAdd = () => {
+  if (type === 'button') {
+    setOptions([...options, { id: Date.now().toString(), text: '' }]);
+  } else if (type === 'list') {
+    setOptions([
+      ...options,
+      {
+        rowId: Date.now().toString(),
+        title: '',
+        description: '',
+      },
+    ]);
+  } else if (type === 'interactive') {
+    setOptions([
+      ...options,
+      {
+        name: '',
+        displayText: '',
+        url: '',
+      },
+    ]);
+  }
+};
 
   const handleOptionUpdate = (index: number, updatedOption: Button | Row) => {
     const newOptions = [...options];
@@ -104,12 +113,13 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
           </label>
           <select
             value={type}
-            onChange={(e) => setType(e.target.value)}
+            onChange={(e) => setType(e.target.value as ResponseType)}
             className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           >
             <option value="text">Text</option>
             <option value="button">Button</option>
             <option value="list">List</option>
+            <option value="interactive">Interactive</option> {/* Nova opção */}
           </select>
         </div>
         <div>
@@ -138,11 +148,11 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
             />
           </div>
         )}
-        {(type === 'button' || type === 'list') && (
+        {(type === 'button' || type === 'list' || type === 'interactive') && (
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <label className="block text-sm font-medium text-gray-700">
-                {type === 'button' ? 'Buttons' : 'List Options'}
+                {type === 'button' ? 'Buttons' : type === 'list' ? 'List Options' : 'Interactive Options'}
               </label>
               <button
                 onClick={handleOptionAdd}
@@ -167,7 +177,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
                       className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                       placeholder="Button text"
                     />
-                  ) : (
+                  ) : type === 'list' ? (
                     <div className="flex-1 space-y-2">
                       <input
                         type="text"
@@ -192,6 +202,46 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
                         rows={2}
                         className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 resize-none"
                         placeholder="Description"
+                      />
+                    </div>
+                  ) : (
+                    // Tipo 'interactive'
+                    <div className="flex-1 space-y-2">
+                      <input
+                        type="text"
+                        value={(option as InteractiveOption).name}
+                        onChange={(e) =>
+                          handleOptionUpdate(index, {
+                            ...(option as InteractiveOption),
+                            name: e.target.value.trim(),
+                          })
+                        }
+                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        placeholder="Name"
+                      />
+                      <input
+                        type="text"
+                        value={(option as InteractiveOption).displayText}
+                        onChange={(e) =>
+                          handleOptionUpdate(index, {
+                            ...(option as InteractiveOption),
+                            displayText: e.target.value.trim(),
+                          })
+                        }
+                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        placeholder="Display Text"
+                      />
+                      <input
+                        type="url"
+                        value={(option as InteractiveOption).url}
+                        onChange={(e) =>
+                          handleOptionUpdate(index, {
+                            ...(option as InteractiveOption),
+                            url: e.target.value.trim(),
+                          })
+                        }
+                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        placeholder="URL"
                       />
                     </div>
                   )}
