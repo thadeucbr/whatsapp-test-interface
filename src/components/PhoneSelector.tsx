@@ -1,25 +1,24 @@
 import React from 'react';
 import { useStore } from '../store';
 import { Phone } from 'lucide-react';
+import type { PhoneNumber } from '../types';
+
+const FIXED_PHONE_NUMBERS: PhoneNumber[] = [
+  { id: '1126509993', number: '551126509993@c.us', name: 'Institucional PF' }
+];
 
 export const PhoneSelector: React.FC = () => {
-  const phoneNumbers = useStore((state) => state.phoneNumbers);
   const selectedPhoneNumber = useStore((state) => state.selectedPhoneNumber);
-  const setPhoneNumbers = useStore((state) => state.setPhoneNumbers);
   const setSelectedPhoneNumber = useStore((state) => state.setSelectedPhoneNumber);
 
   React.useEffect(() => {
-    const fixedNumbers = [
-      { id: '551126509993', number: '551126509993@c.us', name: 'Institucional PF' }
-    ];
-    setPhoneNumbers(fixedNumbers);
-    if (!selectedPhoneNumber && fixedNumbers.length > 0) {
-      setSelectedPhoneNumber(fixedNumbers[0].number);
+    if (!selectedPhoneNumber && FIXED_PHONE_NUMBERS.length > 0) {
+      setSelectedPhoneNumber(FIXED_PHONE_NUMBERS[0].number);
     }
-  }, [selectedPhoneNumber, setPhoneNumbers, setSelectedPhoneNumber]);
+  }, [selectedPhoneNumber, setSelectedPhoneNumber]);
 
-  const formatPhoneDisplay = (phone: { number: string; name?: string }) => {
-    const numberWithoutSuffix = phone.number.replace('@c.us', '');
+  const formatPhoneDisplay = (phone: PhoneNumber) => {
+    const numberWithoutSuffix = phone.number.replace('@c.us', '').replace(/^55/, '');
     return phone.name ? `${phone.name} (${numberWithoutSuffix})` : numberWithoutSuffix;
   };
 
@@ -35,7 +34,7 @@ export const PhoneSelector: React.FC = () => {
         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       >
         <option value="">Select a phone number</option>
-        {phoneNumbers.map((phone) => (
+        {FIXED_PHONE_NUMBERS.map((phone) => (
           <option key={phone.id} value={phone.number}>
             {formatPhoneDisplay(phone)}
           </option>

@@ -32,9 +32,8 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
     const response = {
       from: '551126509993@c.us',
       body: {
-        text,
-        // Changed condition: buttonText should only be set when type is 'list'
-        buttonText: type === 'list' ? buttonText : null,
+        text: text.trim(),
+        buttonText: type === 'list' ? buttonText.trim() : null,
         options: type !== 'text' ? options : null,
       },
       timestamp: Date.now(),
@@ -43,6 +42,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
 
     onUpdate({
       ...interaction,
+      userMessage: interaction.userMessage.trim(),
       expectedResponses: [response],
     });
   };
@@ -80,7 +80,10 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
     <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
       <div className="flex justify-between items-center">
         <h4 className="font-medium">Expected Response</h4>
-        <button onClick={onDelete} className="text-red-500 hover:text-red-700">
+        <button
+          onClick={onDelete}
+          className="text-red-500 hover:text-red-700"
+        >
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
@@ -111,7 +114,6 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
             placeholder="Enter message text"
           />
         </div>
-        {/* Show Button Text only for 'list' type */}
         {type === 'list' && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -132,11 +134,14 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
               <label className="block text-sm font-medium text-gray-700">
                 {type === 'button' ? 'Buttons' : 'List Options'}
               </label>
-              <button onClick={handleOptionAdd} className="text-blue-500 hover:text-blue-700">
+              <button
+                onClick={handleOptionAdd}
+                className="text-blue-500 hover:text-blue-700"
+              >
                 <Plus className="w-4 h-4" />
               </button>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-60 overflow-y-auto">
               {options.map((option, index) => (
                 <div key={index} className="flex space-x-2">
                   {type === 'button' ? (
@@ -146,7 +151,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
                       onChange={(e) =>
                         handleOptionUpdate(index, {
                           id: (option as Button).id,
-                          text: e.target.value,
+                          text: e.target.value.trim(),
                         })
                       }
                       className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -160,7 +165,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
                         onChange={(e) =>
                           handleOptionUpdate(index, {
                             ...(option as Row),
-                            title: e.target.value,
+                            title: e.target.value.trim(),
                           })
                         }
                         className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -171,7 +176,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
                         onChange={(e) =>
                           handleOptionUpdate(index, {
                             ...(option as Row),
-                            description: e.target.value,
+                            description: e.target.value.trim(),
                           })
                         }
                         rows={2}
@@ -196,7 +201,11 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
   );
 };
 
-export const TestEditor: React.FC<TestEditorProps> = ({ testCase, onSave, onCancel }) => {
+export const TestEditor: React.FC<TestEditorProps> = ({
+  testCase,
+  onSave,
+  onCancel,
+}) => {
   const [name, setName] = React.useState(testCase?.name || '');
   const [interactions, setInteractions] = React.useState<TestInteraction[]>(
     testCase?.interactions || []
@@ -236,7 +245,8 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testCase, onSave, onCanc
   const handleSave = () => {
     onSave({
       id: testCase?.id || Date.now().toString(),
-      name,
+      name: name.trim(),
+      folderId: testCase?.folderId,
       interactions,
     });
   };
@@ -253,14 +263,14 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testCase, onSave, onCanc
           </h2>
         </div>
         <button
-          onClick={handleSave}
+          onClick={ handleSave}
           className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         >
           <Save className="w-4 h-4" />
           <span>Save</span>
         </button>
       </div>
-      <div className="space-y-6">
+      <div className="space-y-6 max-h-[calc(100vh-12rem)] overflow-y-auto">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Test Case Name

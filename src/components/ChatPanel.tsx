@@ -79,7 +79,7 @@ export const ChatPanel: React.FC = () => {
   }, [messages, selectedPhoneNumber]);
 
   return (
-    <div className="flex-1 bg-white rounded-lg shadow-lg overflow-hidden flex flex-col">
+    <div className="flex-1 bg-white rounded-lg shadow-lg overflow-hidden flex flex-col h-[calc(100vh-12rem)]">
       <div className="p-4 bg-gray-50 border-b">
         <h2 className="text-lg font-semibold text-gray-800">Chat Preview</h2>
         {selectedPhoneNumber && (

@@ -1,3 +1,5 @@
+import React from 'react';
+
 export interface Button {
   id: string;
   text: string;
@@ -22,9 +24,16 @@ export interface IncomingMessageDTO {
   type: 'text' | 'button' | 'list';
 }
 
+export interface Folder {
+  id: string;
+  name: string;
+  testCaseIds: string[];
+}
+
 export interface TestCase {
   id: string;
   name: string;
+  folderId?: string;
   interactions: TestInteraction[];
 }
 
