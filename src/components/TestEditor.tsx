@@ -1,6 +1,14 @@
 import React from 'react';
+import {
+  Plus,
+  Trash2,
+  ArrowLeft,
+  Save,
+  Copy,
+  ChevronUp,
+  ChevronDown,
+} from 'lucide-react';
 import { TestCase, TestInteraction, Button, Row } from '../types';
-import { Plus, Trash2, ArrowLeft, Save } from 'lucide-react';
 
 interface TestEditorProps {
   testCase: TestCase | null;
@@ -19,8 +27,12 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
   onUpdate,
   onDelete,
 }) => {
-  const [type, setType] = React.useState(interaction.expectedResponses[0]?.type || 'text');
-  const [text, setText] = React.useState(interaction.expectedResponses[0]?.body.text || '');
+  const [type, setType] = React.useState(
+    interaction.expectedResponses[0]?.type || 'text'
+  );
+  const [text, setText] = React.useState(
+    interaction.expectedResponses[0]?.body.text || ''
+  );
   const [buttonText, setButtonText] = React.useState(
     interaction.expectedResponses[0]?.body.buttonText || ''
   );
@@ -74,16 +86,14 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
 
   React.useEffect(() => {
     handleUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type, text, buttonText, options]);
 
   return (
     <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
       <div className="flex justify-between items-center">
         <h4 className="font-medium">Expected Response</h4>
-        <button
-          onClick={onDelete}
-          className="text-red-500 hover:text-red-700"
-        >
+        <button onClick={onDelete} className="text-red-500 hover:text-red-700">
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
@@ -201,6 +211,97 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
   );
 };
 
+interface InteractionItemProps {
+  index: number;
+  interaction: TestInteraction;
+  onUpdate: (updated: TestInteraction) => void;
+  onDelete: () => void;
+  onDuplicate: () => void;
+  onUserMessageChange: (message: string) => void;
+  onReorder: (sourceIndex: number, destinationIndex: number) => void;
+}
+
+const InteractionItem: React.FC<InteractionItemProps> = ({
+  index,
+  interaction,
+  onUpdate,
+  onDelete,
+  onDuplicate,
+  onUserMessageChange,
+  onReorder,
+}) => {
+  const [minimized, setMinimized] = React.useState(false);
+
+  return (
+    <div
+      draggable
+      onDragStart={(e) =>
+        e.dataTransfer.setData('sourceIndex', index.toString())
+      }
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => {
+        const sourceIndex = Number(e.dataTransfer.getData('sourceIndex'));
+        onReorder(sourceIndex, index);
+      }}
+      className="space-y-4 p-4 bg-white border rounded-lg"
+    >
+      <div className="flex justify-between items-center">
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => setMinimized(!minimized)}
+            className="text-gray-500 hover:text-gray-700"
+            title={minimized ? 'Expand' : 'Minimize'}
+          >
+            {minimized ? (
+              <ChevronDown className="w-4 h-4" />
+            ) : (
+              <ChevronUp className="w-4 h-4" />
+            )}
+          </button>
+          <h4 className="font-medium">Interaction {index + 1}</h4>
+        </div>
+        <div className="flex space-x-2">
+          <button
+            onClick={onDuplicate}
+            title="Duplicate Interaction"
+            className="text-blue-500 hover:text-blue-700"
+          >
+            <Copy className="w-4 h-4" />
+          </button>
+          <button
+            onClick={onDelete}
+            title="Delete Interaction"
+            className="text-red-500 hover:text-red-700"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+      {!minimized && (
+        <>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              User Message
+            </label>
+            <textarea
+              value={interaction.userMessage}
+              onChange={(e) => onUserMessageChange(e.target.value)}
+              rows={3}
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 resize-none"
+              placeholder="Enter user message"
+            />
+          </div>
+          <ResponseEditor
+            interaction={interaction}
+            onUpdate={onUpdate}
+            onDelete={onDelete}
+          />
+        </>
+      )}
+    </div>
+  );
+};
+
 export const TestEditor: React.FC<TestEditorProps> = ({
   testCase,
   onSave,
@@ -242,6 +343,21 @@ export const TestEditor: React.FC<TestEditorProps> = ({
     setInteractions(interactions.filter((_, i) => i !== index));
   };
 
+  const handleDuplicateInteraction = (index: number) => {
+    const interactionToDuplicate = interactions[index];
+    const newInteraction = { ...interactionToDuplicate };
+    const newInteractions = [...interactions];
+    newInteractions.splice(index + 1, 0, newInteraction);
+    setInteractions(newInteractions);
+  };
+
+  const handleReorderInteraction = (source: number, destination: number) => {
+    const newInteractions = [...interactions];
+    const [removed] = newInteractions.splice(source, 1);
+    newInteractions.splice(destination, 0, removed);
+    setInteractions(newInteractions);
+  };
+
   const handleSave = () => {
     onSave({
       id: testCase?.id || Date.now().toString(),
@@ -255,7 +371,10 @@ export const TestEditor: React.FC<TestEditorProps> = ({
     <div className="bg-white rounded-lg shadow-lg p-4">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-2">
-          <button onClick={onCancel} className="text-gray-600 hover:text-gray-800">
+          <button
+            onClick={onCancel}
+            className="text-gray-600 hover:text-gray-800"
+          >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <h2 className="text-lg font-semibold text-gray-800">
@@ -263,7 +382,7 @@ export const TestEditor: React.FC<TestEditorProps> = ({
           </h2>
         </div>
         <button
-          onClick={ handleSave}
+          onClick={handleSave}
           className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         >
           <Save className="w-4 h-4" />
@@ -295,39 +414,19 @@ export const TestEditor: React.FC<TestEditorProps> = ({
             </button>
           </div>
           {interactions.map((interaction, index) => (
-            <div key={index} className="space-y-4 p-4 bg-white border rounded-lg">
-              <div className="flex justify-between items-center">
-                <h4 className="font-medium">Interaction {index + 1}</h4>
-                <button
-                  onClick={() => handleDeleteInteraction(index)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  User Message
-                </label>
-                <textarea
-                  value={interaction.userMessage}
-                  onChange={(e) =>
-                    handleUpdateInteraction(index, {
-                      ...interaction,
-                      userMessage: e.target.value,
-                    })
-                  }
-                  rows={3}
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 resize-none"
-                  placeholder="Enter user message"
-                />
-              </div>
-              <ResponseEditor
-                interaction={interaction}
-                onUpdate={(updated) => handleUpdateInteraction(index, updated)}
-                onDelete={() => handleDeleteInteraction(index)}
-              />
-            </div>
+            <InteractionItem
+              key={index}
+              index={index}
+              interaction={interaction}
+              onUpdate={(updated) => handleUpdateInteraction(index, updated)}
+              onDelete={() => handleDeleteInteraction(index)}
+              onDuplicate={() => handleDuplicateInteraction(index)}
+              onUserMessageChange={(msg) => {
+                const newInteraction = { ...interaction, userMessage: msg };
+                handleUpdateInteraction(index, newInteraction);
+              }}
+              onReorder={handleReorderInteraction}
+            />
           ))}
         </div>
       </div>
