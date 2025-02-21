@@ -283,68 +283,70 @@ export const TestManager: React.FC = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">Test Cases</h2>
-        <div className="flex space-x-2">
-          <label className="cursor-pointer">
-            <input type="file" className="hidden" accept=".json" onChange={handleImport} />
-            <Upload className="w-5 h-5 text-gray-600 hover:text-gray-800" />
-          </label>
-          <button onClick={handleExport}>
-            <Download className="w-5 h-5 text-gray-600 hover:text-gray-800" />
-          </button>
-          <button onClick={() => handleAddFolder()} title="Add Folder">
-            <FolderPlus className="w-5 h-5 text-gray-600 hover:text-gray-800" />
-          </button>
-          <button onClick={handleAddTest}>
-            <Plus className="w-5 h-5 text-gray-600 hover:text-gray-800" />
-          </button>
-        </div>
-      </div>
-      <div className="max-h-[calc(100vh-16rem)] overflow-y-auto space-y-2">
-        {folders.filter(folder => !folder.parentId).map(folder => (
-          <FolderItem
-            key={folder.id}
-            folder={folder}
-            testCases={testCases}
-            folders={folders}
-            onRename={handleRenameFolder}
-            onDelete={handleDeleteFolder}
-            onAddSubfolder={handleAddFolder}
-            onTestMove={handleTestMove}
-            onTestSelect={setCurrentTestId}
-            onTestEdit={handleEdit}
-            onTestDuplicate={handleDuplicate}
-            onTestDelete={deleteTestCase}
-            currentTestId={currentTestId}
-          />
-        ))}
-        {testCases.filter(tc => !tc.folderId).map(testCase => (
-          <div
-            key={testCase.id}
-            className={`flex items-center justify-between p-3 rounded-lg border ${
-              currentTestId === testCase.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
-            }`}
-            draggable
-            onDragStart={(e) => e.dataTransfer.setData('text/plain', testCase.id)}
-          >
-            <button className="flex-1 text-left" onClick={() => setCurrentTestId(testCase.id)}>
-              {testCase.name}
+    <div className="flex-1 bg-white rounded-lg shadow-lg overflow-hidden flex flex-col h-[calc(40vh-8rem)]">
+      <div className="p-4 bg-gray-50 border-b">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-800">Test Cases</h2>
+          <div className="flex space-x-2">
+            <label className="cursor-pointer">
+              <input type="file" className="hidden" accept=".json" onChange={handleImport} />
+              <Upload className="w-5 h-5 text-gray-600 hover:text-gray-800" />
+            </label>
+            <button onClick={handleExport}>
+              <Download className="w-5 h-5 text-gray-600 hover:text-gray-800" />
             </button>
-            <div className="flex space-x-2">
-              <button onClick={() => handleDuplicate(testCase)} className="text-gray-400 hover:text-blue-500" title="Duplicate test case">
-                <Copy className="w-4 h-4" />
-              </button>
-              <button onClick={() => handleEdit(testCase)} className="text-gray-400 hover:text-blue-500" title="Edit test case">
-                <Edit2 className="w-4 h-4" />
-              </button>
-              <button onClick={() => deleteTestCase(testCase.id)} className="text-gray-400 hover:text-red-500" title="Delete test case">
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
+            <button onClick={() => handleAddFolder()} title="Add Folder">
+              <FolderPlus className="w-5 h-5 text-gray-600 hover:text-gray-800" />
+            </button>
+            <button onClick={handleAddTest}>
+              <Plus className="w-5 h-5 text-gray-600 hover:text-gray-800" />
+            </button>
           </div>
-        ))}
+        </div>
+        <div className="max-h-[calc(50vh-12rem)] overflow-y-auto space-y-2">
+          {folders.filter(folder => !folder.parentId).map(folder => (
+            <FolderItem
+              key={folder.id}
+              folder={folder}
+              testCases={testCases}
+              folders={folders}
+              onRename={handleRenameFolder}
+              onDelete={handleDeleteFolder}
+              onAddSubfolder={handleAddFolder}
+              onTestMove={handleTestMove}
+              onTestSelect={setCurrentTestId}
+              onTestEdit={handleEdit}
+              onTestDuplicate={handleDuplicate}
+              onTestDelete={deleteTestCase}
+              currentTestId={currentTestId}
+            />
+          ))}
+          {testCases.filter(tc => !tc.folderId).map(testCase => (
+            <div
+              key={testCase.id}
+              className={`flex items-center justify-between p-3 rounded-lg border ${
+                currentTestId === testCase.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+              }`}
+              draggable
+              onDragStart={(e) => e.dataTransfer.setData('text/plain', testCase.id)}
+            >
+              <button className="flex-1 text-left" onClick={() => setCurrentTestId(testCase.id)}>
+                {testCase.name}
+              </button>
+              <div className="flex space-x-2">
+                <button onClick={() => handleDuplicate(testCase)} className="text-gray-400 hover:text-blue-500" title="Duplicate test case">
+                  <Copy className="w-4 h-4" />
+                </button>
+                <button onClick={() => handleEdit(testCase)} className="text-gray-400 hover:text-blue-500" title="Edit test case">
+                  <Edit2 className="w-4 h-4" />
+                </button>
+                <button onClick={() => deleteTestCase(testCase.id)} className="text-gray-400 hover:text-red-500" title="Delete test case">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
