@@ -21,14 +21,24 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpdate, onD
   const [options, setOptions] = React.useState<Array<any>>(response.body.options || []);
 
   const handleUpdate = () => {
+    const updatedBody: any = {
+      text: text.trim(),
+    };
+
+    if (type === 'list') {
+      updatedBody.buttonText = buttonText.trim() || null;
+    }
+
+    if (type !== 'text') {
+      updatedBody.options = options.length > 0 ? options : null;
+    } else {
+      updatedBody.options = null;
+    }
+
     const updatedResponse: IncomingMessageDTO = {
       ...response,
       type,
-      body: {
-        text: text.trim(),
-        buttonText: type === 'list' ? buttonText.trim() : null,
-        options: type !== 'text' ? options : null,
-      },
+      body: updatedBody,
       timestamp: Date.now(),
     };
     onUpdate(updatedResponse);
@@ -115,7 +125,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpdate, onD
             </div>
             <div className="space-y-2 max-h-60 overflow-y-auto">
               {options.map((option, index) => (
-                <div key={index} className="flex space-x-2">
+                <div key={index} className="flex space-x-2 items-start">
                   {type === 'button' ? (
                     <input
                       type="text"
@@ -123,7 +133,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpdate, onD
                       onChange={(e) =>
                         handleOptionUpdate(index, {
                           ...option,
-                          text: e.target.value.trim(),
+                          text: e.target.value,
                         })
                       }
                       className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -137,7 +147,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpdate, onD
                         onChange={(e) =>
                           handleOptionUpdate(index, {
                             ...option,
-                            title: e.target.value.trim(),
+                            title: e.target.value,
                           })
                         }
                         className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -148,7 +158,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpdate, onD
                         onChange={(e) =>
                           handleOptionUpdate(index, {
                             ...option,
-                            description: e.target.value.trim(),
+                            description: e.target.value,
                           })
                         }
                         rows={2}
@@ -164,7 +174,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpdate, onD
                         onChange={(e) =>
                           handleOptionUpdate(index, {
                             ...option,
-                            name: e.target.value.trim(),
+                            name: e.target.value,
                           })
                         }
                         className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -176,7 +186,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpdate, onD
                         onChange={(e) =>
                           handleOptionUpdate(index, {
                             ...option,
-                            displayText: e.target.value.trim(),
+                            displayText: e.target.value,
                           })
                         }
                         className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -188,7 +198,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpdate, onD
                         onChange={(e) =>
                           handleOptionUpdate(index, {
                             ...option,
-                            url: e.target.value.trim(),
+                            url: e.target.value,
                           })
                         }
                         className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -196,7 +206,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpdate, onD
                       />
                     </div>
                   )}
-                  <button onClick={() => handleOptionDelete(index)} className="text-red-500 hover:text-red-700">
+                  <button onClick={() => handleOptionDelete(index)} className="mt-1 text-red-500 hover:text-red-700">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
