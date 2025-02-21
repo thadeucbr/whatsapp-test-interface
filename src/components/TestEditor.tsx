@@ -1,14 +1,6 @@
 import React from 'react';
-import {
-  Plus,
-  Trash2,
-  ArrowLeft,
-  Save,
-  Copy,
-  ChevronUp,
-  ChevronDown,
-} from 'lucide-react';
-import { TestCase, TestInteraction, Button, Row, InteractiveOption } from '../types';
+import { Plus, Trash2, ArrowLeft, Save } from 'lucide-react';
+import { TestCase, TestInteraction, IncomingMessageDTO } from '../types';
 
 interface TestEditorProps {
   testCase: TestCase | null;
@@ -17,73 +9,42 @@ interface TestEditorProps {
 }
 
 interface ResponseEditorProps {
-  interaction: TestInteraction;
-  onUpdate: (updated: TestInteraction) => void;
+  response: IncomingMessageDTO;
+  onUpdate: (updatedResponse: IncomingMessageDTO) => void;
   onDelete: () => void;
 }
 
-const ResponseEditor: React.FC<ResponseEditorProps> = ({
-  interaction,
-  onUpdate,
-  onDelete,
-}) => {
-  const [type, setType] = React.useState<'text' | 'button' | 'list' | 'interactive'>(
-    interaction.expectedResponses[0]?.type || 'text'
-  );
-  const [text, setText] = React.useState(
-    interaction.expectedResponses[0]?.body.text || ''
-  );
-  const [buttonText, setButtonText] = React.useState(
-    interaction.expectedResponses[0]?.body.buttonText || ''
-  );
-  const [options, setOptions] = React.useState<Array<Button | Row | InteractiveOption>>(
-    interaction.expectedResponses[0]?.body.options || []
-  );
+const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpdate, onDelete }) => {
+  const [type, setType] = React.useState<'text' | 'button' | 'list' | 'interactive'>(response.type);
+  const [text, setText] = React.useState(response.body.text);
+  const [buttonText, setButtonText] = React.useState(response.body.buttonText || '');
+  const [options, setOptions] = React.useState<Array<any>>(response.body.options || []);
 
   const handleUpdate = () => {
-    const response = {
-      from: '551126509993@c.us',
+    const updatedResponse: IncomingMessageDTO = {
+      ...response,
+      type,
       body: {
         text: text.trim(),
         buttonText: type === 'list' ? buttonText.trim() : null,
         options: type !== 'text' ? options : null,
       },
       timestamp: Date.now(),
-      type,
     };
-
-    onUpdate({
-      ...interaction,
-      userMessage: interaction.userMessage.trim(),
-      expectedResponses: [response],
-    });
+    onUpdate(updatedResponse);
   };
 
   const handleOptionAdd = () => {
     if (type === 'button') {
       setOptions([...options, { id: Date.now().toString(), text: '' }]);
     } else if (type === 'list') {
-      setOptions([
-        ...options,
-        {
-          rowId: Date.now().toString(),
-          title: '',
-          description: '',
-        },
-      ]);
+      setOptions([...options, { rowId: Date.now().toString(), title: '', description: '' }]);
     } else if (type === 'interactive') {
-      setOptions([
-        ...options,
-        {
-          name: '',
-          displayText: '',
-          url: '',
-        },
-      ]);
+      setOptions([...options, { name: '', displayText: '', url: '' }]);
     }
   };
 
-  const handleOptionUpdate = (index: number, updatedOption: Button | Row | InteractiveOption) => {
+  const handleOptionUpdate = (index: number, updatedOption: any) => {
     const newOptions = [...options];
     newOptions[index] = updatedOption;
     setOptions(newOptions);
@@ -95,6 +56,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
 
   React.useEffect(() => {
     handleUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type, text, buttonText, options]);
 
   return (
@@ -107,9 +69,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
       </div>
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Response Type
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1"> Response Type </label>
           <select
             value={type}
             onChange={(e) => setType(e.target.value as 'text' | 'button' | 'list' | 'interactive')}
@@ -122,9 +82,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Message Text
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1"> Message Text </label>
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -135,9 +93,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
         </div>
         {type === 'list' && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Button Text
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1"> Button Text </label>
             <input
               type="text"
               value={buttonText}
@@ -153,10 +109,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
               <label className="block text-sm font-medium text-gray-700">
                 {type === 'button' ? 'Buttons' : type === 'list' ? 'List Options' : 'Interactive Options'}
               </label>
-              <button
-                onClick={handleOptionAdd}
-                className="text-blue-500 hover:text-blue-700"
-              >
+              <button onClick={handleOptionAdd} className="text-blue-500 hover:text-blue-700">
                 <Plus className="w-4 h-4" />
               </button>
             </div>
@@ -166,10 +119,10 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
                   {type === 'button' ? (
                     <input
                       type="text"
-                      value={(option as Button).text}
+                      value={option.text}
                       onChange={(e) =>
                         handleOptionUpdate(index, {
-                          id: (option as Button).id,
+                          ...option,
                           text: e.target.value.trim(),
                         })
                       }
@@ -180,10 +133,10 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
                     <div className="flex-1 space-y-2">
                       <input
                         type="text"
-                        value={(option as Row).title}
+                        value={option.title}
                         onChange={(e) =>
                           handleOptionUpdate(index, {
-                            ...(option as Row),
+                            ...option,
                             title: e.target.value.trim(),
                           })
                         }
@@ -191,10 +144,10 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
                         placeholder="Title"
                       />
                       <textarea
-                        value={(option as Row).description}
+                        value={option.description}
                         onChange={(e) =>
                           handleOptionUpdate(index, {
-                            ...(option as Row),
+                            ...option,
                             description: e.target.value.trim(),
                           })
                         }
@@ -207,10 +160,10 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
                     <div className="flex-1 space-y-2">
                       <input
                         type="text"
-                        value={(option as InteractiveOption).name}
+                        value={option.name}
                         onChange={(e) =>
                           handleOptionUpdate(index, {
-                            ...(option as InteractiveOption),
+                            ...option,
                             name: e.target.value.trim(),
                           })
                         }
@@ -219,10 +172,10 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
                       />
                       <input
                         type="text"
-                        value={(option as InteractiveOption).displayText}
+                        value={option.displayText}
                         onChange={(e) =>
                           handleOptionUpdate(index, {
-                            ...(option as InteractiveOption),
+                            ...option,
                             displayText: e.target.value.trim(),
                           })
                         }
@@ -231,10 +184,10 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
                       />
                       <input
                         type="url"
-                        value={(option as InteractiveOption).url}
+                        value={option.url}
                         onChange={(e) =>
                           handleOptionUpdate(index, {
-                            ...(option as InteractiveOption),
+                            ...option,
                             url: e.target.value.trim(),
                           })
                         }
@@ -243,10 +196,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
                       />
                     </div>
                   )}
-                  <button
-                    onClick={() => handleOptionDelete(index)}
-                    className="text-red-500 hover:text-red-700"
-                  >
+                  <button onClick={() => handleOptionDelete(index)} className="text-red-500 hover:text-red-700">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -259,11 +209,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({
   );
 };
 
-export const TestEditor: React.FC<TestEditorProps> = ({
-  testCase,
-  onSave,
-  onCancel,
-}) => {
+export const TestEditor: React.FC<TestEditorProps> = ({ testCase, onSave, onCancel }) => {
   const [name, setName] = React.useState(testCase?.name || '');
   const [interactions, setInteractions] = React.useState<TestInteraction[]>(
     testCase?.interactions || []
@@ -274,18 +220,7 @@ export const TestEditor: React.FC<TestEditorProps> = ({
       ...interactions,
       {
         userMessage: '',
-        expectedResponses: [
-          {
-            from: '551126509993@c.us',
-            body: {
-              text: '',
-              buttonText: null,
-              options: null,
-            },
-            timestamp: Date.now(),
-            type: 'text',
-          },
-        ],
+        expectedResponses: [],
       },
     ]);
   };
@@ -300,11 +235,27 @@ export const TestEditor: React.FC<TestEditorProps> = ({
     setInteractions(interactions.filter((_, i) => i !== index));
   };
 
+  const handleAddResponse = (interactionIndex: number) => {
+    const newInteractions = [...interactions];
+    newInteractions[interactionIndex].expectedResponses.push({
+      from: '551126509993@c.us',
+      body: {
+        text: '',
+        buttonText: null,
+        options: null,
+      },
+      timestamp: Date.now(),
+      type: 'text',
+    });
+    setInteractions(newInteractions);
+  };
+
   const handleSave = () => {
     onSave({
       id: testCase?.id || Date.now().toString(),
       name,
       interactions,
+      folderId: testCase?.folderId,
     });
   };
 
@@ -329,9 +280,7 @@ export const TestEditor: React.FC<TestEditorProps> = ({
       </div>
       <div className="space-y-6 max-h-[calc(100vh-12rem)] overflow-y-auto">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Test Case Name
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1"> Test Case Name </label>
           <input
             type="text"
             value={name}
@@ -363,9 +312,7 @@ export const TestEditor: React.FC<TestEditorProps> = ({
                 </button>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  User Message
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1"> User Message </label>
                 <textarea
                   value={interaction.userMessage}
                   onChange={(e) =>
@@ -379,11 +326,31 @@ export const TestEditor: React.FC<TestEditorProps> = ({
                   placeholder="Enter user message"
                 />
               </div>
-              <ResponseEditor
-                interaction={interaction}
-                onUpdate={(updated) => handleUpdateInteraction(index, updated)}
-                onDelete={() => handleDeleteInteraction(index)}
-              />
+              <div className="space-y-4">
+                {interaction.expectedResponses.map((response, respIndex) => (
+                  <ResponseEditor
+                    key={respIndex}
+                    response={response}
+                    onUpdate={(updatedResponse) => {
+                      const newInteractions = [...interactions];
+                      newInteractions[index].expectedResponses[respIndex] = updatedResponse;
+                      setInteractions(newInteractions);
+                    }}
+                    onDelete={() => {
+                      const newInteractions = [...interactions];
+                      newInteractions[index].expectedResponses.splice(respIndex, 1);
+                      setInteractions(newInteractions);
+                    }}
+                  />
+                ))}
+                <button
+                  onClick={() => handleAddResponse(index)}
+                  className="flex items-center space-x-1 text-green-500 hover:text-green-700"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add Response</span>
+                </button>
+              </div>
             </div>
           ))}
         </div>

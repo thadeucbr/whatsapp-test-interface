@@ -1,8 +1,9 @@
 import { create } from 'zustand';
-import { TestCase, Message, PhoneNumber } from './types';
+import { TestCase, Message, PhoneNumber, Folder } from './types';
 
 interface Store {
   testCases: TestCase[];
+  folders: Folder[];
   currentTestId: string | null;
   messages: Message[];
   connected: boolean;
@@ -17,11 +18,14 @@ interface Store {
   setConnected: (status: boolean) => void;
   setPhoneNumbers: (numbers: PhoneNumber[]) => void;
   setSelectedPhoneNumber: (number: string | null) => void;
+  addFolder: (folder: Folder) => void;
+  updateFolder: (folder: Folder) => void;
+  deleteFolder: (id: string) => void;
 }
 
-// Create store with plain objects and functions
-export const useStore = create<Store>()((set) => ({
+export const useStore = create<Store>((set, get) => ({
   testCases: JSON.parse(localStorage.getItem('testCases') || '[]'),
+  folders: JSON.parse(localStorage.getItem('folders') || '[]'),
   currentTestId: null,
   messages: [],
   connected: false,
@@ -35,9 +39,7 @@ export const useStore = create<Store>()((set) => ({
     }),
   updateTestCase: (testCase) =>
     set((state) => {
-      const newTestCases = state.testCases.map((tc) =>
-        tc.id === testCase.id ? testCase : tc
-      );
+      const newTestCases = state.testCases.map((tc) => (tc.id === testCase.id ? testCase : tc));
       localStorage.setItem('testCases', JSON.stringify(newTestCases));
       return { testCases: newTestCases };
     }),
@@ -54,4 +56,26 @@ export const useStore = create<Store>()((set) => ({
   setConnected: (status) => set({ connected: status }),
   setPhoneNumbers: (numbers) => set({ phoneNumbers: numbers }),
   setSelectedPhoneNumber: (number) => set({ selectedPhoneNumber: number }),
+  addFolder: (folder) =>
+    set((state) => {
+      const newFolders = [...state.folders, folder];
+      localStorage.setItem('folders', JSON.stringify(newFolders));
+      return { folders: newFolders };
+    }),
+  updateFolder: (folder) =>
+    set((state) => {
+      const newFolders = state.folders.map((f) => (f.id === folder.id ? folder : f));
+      localStorage.setItem('folders', JSON.stringify(newFolders));
+      return { folders: newFolders };
+    }),
+  deleteFolder: (id) =>
+    set((state) => {
+      const newFolders = state.folders.filter((f) => f.id !== id);
+      localStorage.setItem('folders', JSON.stringify(newFolders));
+      const updatedTestCases = state.testCases.map((tc) =>
+        tc.folderId === id ? { ...tc, folderId: undefined } : tc
+      );
+      localStorage.setItem('testCases', JSON.stringify(updatedTestCases));
+      return { folders: newFolders, testCases: updatedTestCases };
+    }),
 }));
