@@ -2,7 +2,7 @@ import React from 'react';
 import { useStore } from '../store';
 import { sendMessage } from '../socket';
 import { Send, Play, AlertCircle, CheckCircle } from 'lucide-react';
-import { Message, TestInteraction, Button, Row } from '../types';
+import { Message, TestInteraction, Button, Row, InteractiveOption } from '../types';
 
 interface TestResult {
   interactionIndex: number;
@@ -23,6 +23,133 @@ export const TestRunner: React.FC = () => {
   const currentTest = testCases.find((tc) => tc.id === currentTestId);
   const lastMessageRef = React.useRef<Message | null>(null);
 
+  const compareOptions = (
+    expected: any[],
+    received: any[],
+    type: 'button' | 'list' | 'interactive'
+  ): { success: boolean; error?: string; details?: any[] } => {
+    if (expected.length !== received.length) {
+      return {
+        success: false,
+        error: `Expected ${expected.length} ${type}s but received ${received.length}`,
+      };
+    }
+
+    const details: { field: string; expected: string; received: string }[] = [];
+
+    for (let i = 0; i < expected.length; i++) {
+      if (type === 'button') {
+        const expectedButton = expected[i] as Button;
+        const receivedButton = received[i] as Button;
+
+        if (expectedButton.text !== receivedButton.text) {
+          details.push({
+            field: `Button ${i + 1} text`,
+            expected: expectedButton.text,
+            received: receivedButton.text,
+          });
+        }
+      } else if (type === 'list') {
+        const expectedRow = expected[i] as Row;
+        const receivedRow = received[i] as Row;
+
+        if (expectedRow.title !== receivedRow.title) {
+          details.push({
+            field: `List item ${i + 1} title`,
+            expected: expectedRow.title,
+            received: receivedRow.title,
+          });
+        }
+
+        if (expectedRow.description !== receivedRow.description) {
+          details.push({
+            field: `List item ${i + 1} description`,
+            expected: expectedRow.description,
+            received: receivedRow.description,
+          });
+        }
+      } else if (type === 'interactive') {
+        const expectedOption = expected[i] as InteractiveOption;
+        const receivedOption = received[i] as InteractiveOption;
+
+        if (expectedOption.displayText !== receivedOption.displayText) {
+          details.push({
+            field: `Interactive option ${i + 1} display text`,
+            expected: expectedOption.displayText,
+            received: receivedOption.displayText,
+          });
+        }
+
+        if (expectedOption.url !== receivedOption.url) {
+          details.push({
+            field: `Interactive option ${i + 1} URL`,
+            expected: expectedOption.url,
+            received: receivedOption.url,
+          });
+        }
+      }
+    }
+
+    return {
+      success: details.length === 0,
+      error: details.length > 0 ? `${type} content mismatch` : undefined,
+      details: details.length > 0 ? details : undefined,
+    };
+  };
+
+  const verifyResponse = (interaction: TestInteraction, receivedMessage: Message): TestResult => {
+    const expected = interaction.expectedResponses[0];
+    const result: TestResult = {
+      interactionIndex: currentInteractionIndex,
+      success: true,
+    };
+
+    if (expected.type !== receivedMessage.type) {
+      return {
+        ...result,
+        success: false,
+        error: `Message type mismatch`,
+        details: [{
+          field: 'Message type',
+          expected: expected.type,
+          received: receivedMessage.type,
+        }],
+      };
+    }
+
+    if (expected.body.text !== receivedMessage.content) {
+      return {
+        ...result,
+        success: false,
+        error: 'Message content mismatch',
+        details: [{
+          field: 'Message text',
+          expected: expected.body.text,
+          received: receivedMessage.content,
+        }],
+      };
+    }
+
+    if (expected.type !== 'text' && expected.body.options) {
+      const optionsComparison = compareOptions(
+        expected.body.options,
+        receivedMessage.options || [],
+        expected.type
+      );
+
+      if (!optionsComparison.success) {
+        return {
+          ...result,
+          success: false,
+          error: optionsComparison.error,
+          details: optionsComparison.details,
+        };
+      }
+    }
+
+    return result;
+  };
+
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     if (message.trim()) {
@@ -30,150 +157,6 @@ export const TestRunner: React.FC = () => {
       setMessage('');
     }
   };
-
-const compareOptions = (
-  expected: any[],
-  received: any[],
-  type: 'button' | 'list' | 'interactive'
-): { success: boolean; error?: string; details?: any[] } => {
-  if (expected.length !== received.length) {
-    return {
-      success: false,
-      error: `Esperado ${expected.length} ${type}s mas recebido ${received.length}`,
-    };
-  }
-
-  const details: { field: string; expected: string; received: string }[] = [];
-
-  for (let i = 0; i < expected.length; i++) {
-    if (type === 'button') {
-      const expectedButton = expected[i] as Button;
-      const receivedButton = received[i] as Button;
-
-      if (expectedButton.text !== receivedButton.text) {
-        details.push({
-          field: `Botão ${i + 1} texto`,
-          expected: expectedButton.text,
-          received: receivedButton.text,
-        });
-      }
-    } else if (type === 'list') {
-      const expectedRow = expected[i] as Row;
-      const receivedRow = received[i] as Row;
-
-      if (expectedRow.title !== receivedRow.title) {
-        details.push({
-          field: `Item da lista ${i + 1} título`,
-          expected: expectedRow.title,
-          received: receivedRow.title,
-        });
-      }
-
-      if (expectedRow.description !== receivedRow.description) {
-        details.push({
-          field: `Item da lista ${i + 1} descrição`,
-          expected: expectedRow.description,
-          received: receivedRow.description,
-        });
-      }
-    } else if (type === 'interactive') {
-      const expectedOption = expected[i];
-      const receivedOption = received[i];
-
-      if (expectedOption.displayText !== receivedOption.displayText) {
-        details.push({
-          field: `Opção ${i + 1} displayText`,
-          expected: expectedOption.displayText,
-          received: receivedOption.displayText,
-        });
-      }
-
-      if (expectedOption.url !== receivedOption.url) {
-        details.push({
-          field: `Opção ${i + 1} URL`,
-          expected: expectedOption.url,
-          received: receivedOption.url,
-        });
-      }
-    }
-  }
-
-  return {
-    success: details.length === 0,
-    error: details.length > 0 ? `Conteúdo do ${type} não corresponde` : undefined,
-    details: details.length > 0 ? details : undefined,
-  };
-};
-
-const verifyResponse = (interaction: TestInteraction, receivedMessage: Message): TestResult => {
-  const expected = interaction.expectedResponses[0];
-  const result: TestResult = {
-    interactionIndex: currentInteractionIndex,
-    success: true,
-  };
-
-  // Verify the message type
-  if (expected.type !== receivedMessage.type) {
-    return {
-      ...result,
-      success: false,
-      error: `Message type does not match`,
-      details: [{
-        field: 'Message type',
-        expected: expected.type,
-        received: receivedMessage.type,
-      }],
-    };
-  }
-
-  // Verify the text content
-  if (expected.body.text !== receivedMessage.content) {
-    return {
-      ...result,
-      success: false,
-      error: 'Message content does not match',
-      details: [{
-        field: 'Message text',
-        expected: expected.body.text,
-        received: receivedMessage.content,
-      }],
-    };
-  }
-
-  // Verify buttons, lists, or interactives if present
-  if (expected.type !== 'text' && expected.body.options) {
-    const optionsComparison = compareOptions(
-      expected.body.options,
-      receivedMessage.options || [],
-      expected.type as 'button' | 'list' | 'interactive' // Includes 'interactive'
-    );
-
-    if (!optionsComparison.success) {
-      return {
-        ...result,
-        success: false,
-        error: optionsComparison.error,
-        details: optionsComparison.details,
-      };
-    }
-
-    // For 'list' type, verify the button text if present
-    if (expected.type === 'list' && expected.body.buttonText !== receivedMessage.buttonText) {
-      return {
-        ...result,
-        success: false,
-        error: 'List button text does not match',
-        details: [{
-          field: 'Button text',
-          expected: expected.body.buttonText || '',
-          received: receivedMessage.buttonText || '',
-        }],
-      };
-    }
-  }
-
-  return result;
-};
 
   const runTest = () => {
     if (currentTest && currentTest.interactions.length > 0) {
