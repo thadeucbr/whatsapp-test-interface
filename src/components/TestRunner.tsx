@@ -2,7 +2,7 @@ import React from 'react';
 import { useStore } from '../store';
 import { sendMessage } from '../socket';
 import { Send, Play, AlertCircle, CheckCircle } from 'lucide-react';
-import { Message, TestInteraction, IncomingMessageDTO } from '../types';
+import { Message, TestInteraction, IncomingMessageDTO, InteractiveOption } from '../types';
 
 interface TestResult {
   interactionIndex: number;
@@ -242,8 +242,8 @@ export const TestRunner: React.FC = () => {
   }, [currentInteractionIndex, currentResponseIndex, currentTest, messages]);
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-4">
-      <div className="mb-4">
+    <div className="flex-1 bg-white rounded-lg shadow-lg overflow-hidden flex flex-col h-[calc(60vh-12rem)]">
+      <div className="p-4 bg-gray-50 border-b">
         <h2 className="text-lg font-semibold text-gray-800">Test Runner</h2>
         <div className="flex items-center mt-2">
           <div
@@ -257,7 +257,7 @@ export const TestRunner: React.FC = () => {
         </div>
       </div>
       {currentTest ? (
-        <div className="space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-medium">{currentTest.name}</h3>
             {currentTest.interactions.length > 0 && (
@@ -347,7 +347,9 @@ export const TestRunner: React.FC = () => {
           )}
         </div>
       ) : (
-        <p className="text-gray-500">Select a test case to begin testing</p>
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-gray-500">Select a test case to begin testing</p>
+        </div>
       )}
     </div>
   );
