@@ -1,7 +1,7 @@
 import React from 'react';
 import { useStore } from '../store';
-import { Message as MessageType } from '../types';
-import { MessageCircle, User } from 'lucide-react';
+import { Message as MessageType, InteractiveOption } from '../types';
+import { MessageCircle, User, ExternalLink } from 'lucide-react';
 
 const Message: React.FC<{ message: MessageType }> = ({ message }) => {
   const isUser = message.isUser;
@@ -53,6 +53,19 @@ const Message: React.FC<{ message: MessageType }> = ({ message }) => {
                     <p className="text-sm text-gray-600">{option.description}</p>
                   </div>
                 ))}
+              {message.type === 'interactive' &&
+                message.options.map((option: InteractiveOption) => (
+                  <a
+                    key={option.name}
+                    href={option.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between w-full px-4 py-2 text-sm text-blue-600 bg-white rounded-lg border border-blue-200 hover:bg-blue-50"
+                  >
+                    <span>{option.displayText}</span>
+                    <ExternalLink className="w-4 h-4 ml-2" />
+                  </a>
+                ))}
             </div>
           )}
         </div>
@@ -70,16 +83,13 @@ export const ChatPanel: React.FC = () => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Filter messages based on selected phone number
   const filteredMessages = React.useMemo(() => {
     if (!selectedPhoneNumber) return [];
-    return messages.filter(
-      (msg) => msg.phoneNumber === selectedPhoneNumber
-    );
+    return messages.filter((msg) => msg.phoneNumber === selectedPhoneNumber);
   }, [messages, selectedPhoneNumber]);
 
   return (
-    <div className="flex-1 bg-white rounded-lg shadow-lg overflow-hidden flex flex-col h-[calc(100vh-12rem)]">
+    <div className="flex-1 bg-white rounded-lg shadow-lg overflow-hidden flex flex-col">
       <div className="p-4 bg-gray-50 border-b">
         <h2 className="text-lg font-semibold text-gray-800">Chat Preview</h2>
         {selectedPhoneNumber && (
