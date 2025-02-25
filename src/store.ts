@@ -23,7 +23,7 @@ interface Store {
   deleteFolder: (id: string) => void;
 }
 
-export const useStore = create<Store>()((set) => ({
+export const useStore = create<Store>((set, get) => ({
   testCases: JSON.parse(localStorage.getItem('testCases') || '[]'),
   folders: JSON.parse(localStorage.getItem('folders') || '[]'),
   currentTestId: null,
@@ -39,9 +39,7 @@ export const useStore = create<Store>()((set) => ({
     }),
   updateTestCase: (testCase) =>
     set((state) => {
-      const newTestCases = state.testCases.map((tc) =>
-        tc.id === testCase.id ? testCase : tc
-      );
+      const newTestCases = state.testCases.map((tc) => (tc.id === testCase.id ? testCase : tc));
       localStorage.setItem('testCases', JSON.stringify(newTestCases));
       return { testCases: newTestCases };
     }),
@@ -66,21 +64,18 @@ export const useStore = create<Store>()((set) => ({
     }),
   updateFolder: (folder) =>
     set((state) => {
-      const newFolders = state.folders.map((f) =>
-        f.id === folder.id ? folder : f
-      );
+      const newFolders = state.folders.map((f) => (f.id === folder.id ? folder : f));
       localStorage.setItem('folders', JSON.stringify(newFolders));
       return { folders: newFolders };
     }),
   deleteFolder: (id) =>
     set((state) => {
       const newFolders = state.folders.filter((f) => f.id !== id);
-      // Update test cases to remove folder reference
-      const newTestCases = state.testCases.map((tc) =>
+      localStorage.setItem('folders', JSON.stringify(newFolders));
+      const updatedTestCases = state.testCases.map((tc) =>
         tc.folderId === id ? { ...tc, folderId: undefined } : tc
       );
-      localStorage.setItem('folders', JSON.stringify(newFolders));
-      localStorage.setItem('testCases', JSON.stringify(newTestCases));
-      return { folders: newFolders, testCases: newTestCases };
+      localStorage.setItem('testCases', JSON.stringify(updatedTestCases));
+      return { folders: newFolders, testCases: updatedTestCases };
     }),
 }));

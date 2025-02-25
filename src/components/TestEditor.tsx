@@ -1,14 +1,6 @@
 import React from 'react';
-import {
-  Plus,
-  Trash2,
-  ArrowLeft,
-  Save,
-  Copy,
-  ChevronUp,
-  ChevronDown,
-} from 'lucide-react';
-import { TestCase, TestInteraction, Button, Row, InteractiveOption } from '../types';
+import { Plus, Trash2, ArrowLeft, Save } from 'lucide-react';
+import { TestCase, TestInteraction, IncomingMessageDTO } from '../types';
 
 interface TestEditorProps {
   testCase: TestCase | null;
@@ -17,73 +9,52 @@ interface TestEditorProps {
 }
 
 interface ResponseEditorProps {
-  interaction: TestInteraction;
-  onUpdate: (updated: TestInteraction) => void;
+  response: IncomingMessageDTO;
+  onUpdate: (updatedResponse: IncomingMessageDTO) => void;
   onDelete: () => void;
 }
 
-const ResponseEditor: React.FC<ResponseEditorProps> = ({
-  interaction,
-  onUpdate,
-  onDelete,
-}) => {
-  const [type, setType] = React.useState<ResponseType>(
-    interaction.expectedResponses[0]?.type || 'text'
-  );
-  const [text, setText] = React.useState(
-    interaction.expectedResponses[0]?.body.text || ''
-  );
-  const [buttonText, setButtonText] = React.useState(
-    interaction.expectedResponses[0]?.body.buttonText || ''
-  );
-  const [options, setOptions] = React.useState<Array<Button | Row | InteractiveOption>>(
-    interaction.expectedResponses[0]?.body.options || []
-  );
+const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpdate, onDelete }) => {
+  const [type, setType] = React.useState<'text' | 'button' | 'list' | 'interactive'>(response.type);
+  const [text, setText] = React.useState(response.body.text);
+  const [buttonText, setButtonText] = React.useState(response.body.buttonText || '');
+  const [options, setOptions] = React.useState<Array<any>>(response.body.options || []);
 
   const handleUpdate = () => {
-    const response: Response = {
-      from: '551126509993@c.us',
-      body: {
-        text: text.trim(),
-        buttonText: type === 'list' ? buttonText.trim() : null,
-        options: type !== 'text' ? options : null,
-      },
-      timestamp: Date.now(),
-      type: type,
+    const updatedBody: any = {
+      text: text.trim(),
     };
 
-    onUpdate({
-      ...interaction,
-      userMessage: interaction.userMessage.trim(),
-      expectedResponses: [response],
-    });
+    if (type === 'list') {
+      updatedBody.buttonText = buttonText.trim() || null;
+    }
+
+    if (type !== 'text') {
+      updatedBody.options = options.length > 0 ? options : null;
+    } else {
+      updatedBody.options = null;
+    }
+
+    const updatedResponse: IncomingMessageDTO = {
+      ...response,
+      type,
+      body: updatedBody,
+      timestamp: Date.now(),
+    };
+    onUpdate(updatedResponse);
   };
 
-const handleOptionAdd = () => {
-  if (type === 'button') {
-    setOptions([...options, { id: Date.now().toString(), text: '' }]);
-  } else if (type === 'list') {
-    setOptions([
-      ...options,
-      {
-        rowId: Date.now().toString(),
-        title: '',
-        description: '',
-      },
-    ]);
-  } else if (type === 'interactive') {
-    setOptions([
-      ...options,
-      {
-        name: '',
-        displayText: '',
-        url: '',
-      },
-    ]);
-  }
-};
+  const handleOptionAdd = () => {
+    if (type === 'button') {
+      setOptions([...options, { id: Date.now().toString(), text: '' }]);
+    } else if (type === 'list') {
+      setOptions([...options, { rowId: Date.now().toString(), title: '', description: '' }]);
+    } else if (type === 'interactive') {
+      setOptions([...options, { name: '', displayText: '', url: '' }]);
+    }
+  };
 
-  const handleOptionUpdate = (index: number, updatedOption: Button | Row) => {
+  const handleOptionUpdate = (index: number, updatedOption: any) => {
     const newOptions = [...options];
     newOptions[index] = updatedOption;
     setOptions(newOptions);
@@ -108,24 +79,20 @@ const handleOptionAdd = () => {
       </div>
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Response Type
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1"> Response Type </label>
           <select
             value={type}
-            onChange={(e) => setType(e.target.value as ResponseType)}
+            onChange={(e) => setType(e.target.value as 'text' | 'button' | 'list' | 'interactive')}
             className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           >
             <option value="text">Text</option>
             <option value="button">Button</option>
             <option value="list">List</option>
-            <option value="interactive">Interactive</option> {/* Nova opção */}
+            <option value="interactive">Interactive</option>
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Message Text
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1"> Message Text </label>
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -136,9 +103,7 @@ const handleOptionAdd = () => {
         </div>
         {type === 'list' && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Button Text
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1"> Button Text </label>
             <input
               type="text"
               value={buttonText}
@@ -154,24 +119,21 @@ const handleOptionAdd = () => {
               <label className="block text-sm font-medium text-gray-700">
                 {type === 'button' ? 'Buttons' : type === 'list' ? 'List Options' : 'Interactive Options'}
               </label>
-              <button
-                onClick={handleOptionAdd}
-                className="text-blue-500 hover:text-blue-700"
-              >
+              <button onClick={handleOptionAdd} className="text-blue-500 hover:text-blue-700">
                 <Plus className="w-4 h-4" />
               </button>
             </div>
             <div className="space-y-2 max-h-60 overflow-y-auto">
               {options.map((option, index) => (
-                <div key={index} className="flex space-x-2">
+                <div key={index} className="flex space-x-2 items-start">
                   {type === 'button' ? (
                     <input
                       type="text"
-                      value={(option as Button).text}
+                      value={option.text}
                       onChange={(e) =>
                         handleOptionUpdate(index, {
-                          id: (option as Button).id,
-                          text: e.target.value.trim(),
+                          ...option,
+                          text: e.target.value,
                         })
                       }
                       className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -181,22 +143,22 @@ const handleOptionAdd = () => {
                     <div className="flex-1 space-y-2">
                       <input
                         type="text"
-                        value={(option as Row).title}
+                        value={option.title}
                         onChange={(e) =>
                           handleOptionUpdate(index, {
-                            ...(option as Row),
-                            title: e.target.value.trim(),
+                            ...option,
+                            title: e.target.value,
                           })
                         }
                         className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                         placeholder="Title"
                       />
                       <textarea
-                        value={(option as Row).description}
+                        value={option.description}
                         onChange={(e) =>
                           handleOptionUpdate(index, {
-                            ...(option as Row),
-                            description: e.target.value.trim(),
+                            ...option,
+                            description: e.target.value,
                           })
                         }
                         rows={2}
@@ -205,15 +167,14 @@ const handleOptionAdd = () => {
                       />
                     </div>
                   ) : (
-                    // Tipo 'interactive'
                     <div className="flex-1 space-y-2">
                       <input
                         type="text"
-                        value={(option as InteractiveOption).name}
+                        value={option.name}
                         onChange={(e) =>
                           handleOptionUpdate(index, {
-                            ...(option as InteractiveOption),
-                            name: e.target.value.trim(),
+                            ...option,
+                            name: e.target.value,
                           })
                         }
                         className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -221,11 +182,11 @@ const handleOptionAdd = () => {
                       />
                       <input
                         type="text"
-                        value={(option as InteractiveOption).displayText}
+                        value={option.displayText}
                         onChange={(e) =>
                           handleOptionUpdate(index, {
-                            ...(option as InteractiveOption),
-                            displayText: e.target.value.trim(),
+                            ...option,
+                            displayText: e.target.value,
                           })
                         }
                         className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -233,11 +194,11 @@ const handleOptionAdd = () => {
                       />
                       <input
                         type="url"
-                        value={(option as InteractiveOption).url}
+                        value={option.url}
                         onChange={(e) =>
                           handleOptionUpdate(index, {
-                            ...(option as InteractiveOption),
-                            url: e.target.value.trim(),
+                            ...option,
+                            url: e.target.value,
                           })
                         }
                         className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -245,10 +206,7 @@ const handleOptionAdd = () => {
                       />
                     </div>
                   )}
-                  <button
-                    onClick={() => handleOptionDelete(index)}
-                    className="text-red-500 hover:text-red-700"
-                  >
+                  <button onClick={() => handleOptionDelete(index)} className="mt-1 text-red-500 hover:text-red-700">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -261,102 +219,7 @@ const handleOptionAdd = () => {
   );
 };
 
-interface InteractionItemProps {
-  index: number;
-  interaction: TestInteraction;
-  onUpdate: (updated: TestInteraction) => void;
-  onDelete: () => void;
-  onDuplicate: () => void;
-  onUserMessageChange: (message: string) => void;
-  onReorder: (sourceIndex: number, destinationIndex: number) => void;
-}
-
-const InteractionItem: React.FC<InteractionItemProps> = ({
-  index,
-  interaction,
-  onUpdate,
-  onDelete,
-  onDuplicate,
-  onUserMessageChange,
-  onReorder,
-}) => {
-  const [minimized, setMinimized] = React.useState(false);
-
-  return (
-    <div
-      draggable
-      onDragStart={(e) =>
-        e.dataTransfer.setData('sourceIndex', index.toString())
-      }
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={(e) => {
-        const sourceIndex = Number(e.dataTransfer.getData('sourceIndex'));
-        onReorder(sourceIndex, index);
-      }}
-      className="space-y-4 p-4 bg-white border rounded-lg"
-    >
-      <div className="flex justify-between items-center">
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={() => setMinimized(!minimized)}
-            className="text-gray-500 hover:text-gray-700"
-            title={minimized ? 'Expand' : 'Minimize'}
-          >
-            {minimized ? (
-              <ChevronDown className="w-4 h-4" />
-            ) : (
-              <ChevronUp className="w-4 h-4" />
-            )}
-          </button>
-          <h4 className="font-medium">Interaction {index + 1}</h4>
-        </div>
-        <div className="flex space-x-2">
-          <button
-            onClick={onDuplicate}
-            title="Duplicate Interaction"
-            className="text-blue-500 hover:text-blue-700"
-          >
-            <Copy className="w-4 h-4" />
-          </button>
-          <button
-            onClick={onDelete}
-            title="Delete Interaction"
-            className="text-red-500 hover:text-red-700"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-      {!minimized && (
-        <>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              User Message
-            </label>
-            <textarea
-              value={interaction.userMessage}
-              onChange={(e) => onUserMessageChange(e.target.value)}
-              rows={3}
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 resize-none"
-              placeholder="Enter user message"
-            />
-          </div>
-          <ResponseEditor
-            interaction={interaction}
-            onUpdate={onUpdate}
-            onDelete={onDelete}
-          />
-        </>
-      )}
-    </div>
-  );
-};
-
-export const TestEditor: React.FC<TestEditorProps> = ({
-  testCase,
-  onSave,
-  onCancel,
-}) => {
+export const TestEditor: React.FC<TestEditorProps> = ({ testCase, onSave, onCancel }) => {
   const [name, setName] = React.useState(testCase?.name || '');
   const [interactions, setInteractions] = React.useState<TestInteraction[]>(
     testCase?.interactions || []
@@ -367,18 +230,7 @@ export const TestEditor: React.FC<TestEditorProps> = ({
       ...interactions,
       {
         userMessage: '',
-        expectedResponses: [
-          {
-            from: '551126509993@c.us',
-            body: {
-              text: '',
-              buttonText: null,
-              options: null,
-            },
-            timestamp: Date.now(),
-            type: 'text',
-          },
-        ],
+        expectedResponses: [],
       },
     ]);
   };
@@ -393,27 +245,27 @@ export const TestEditor: React.FC<TestEditorProps> = ({
     setInteractions(interactions.filter((_, i) => i !== index));
   };
 
-  const handleDuplicateInteraction = (index: number) => {
-    const interactionToDuplicate = interactions[index];
-    const newInteraction = { ...interactionToDuplicate };
+  const handleAddResponse = (interactionIndex: number) => {
     const newInteractions = [...interactions];
-    newInteractions.splice(index + 1, 0, newInteraction);
-    setInteractions(newInteractions);
-  };
-
-  const handleReorderInteraction = (source: number, destination: number) => {
-    const newInteractions = [...interactions];
-    const [removed] = newInteractions.splice(source, 1);
-    newInteractions.splice(destination, 0, removed);
+    newInteractions[interactionIndex].expectedResponses.push({
+      from: '551126509993@c.us',
+      body: {
+        text: '',
+        buttonText: null,
+        options: null,
+      },
+      timestamp: Date.now(),
+      type: 'text',
+    });
     setInteractions(newInteractions);
   };
 
   const handleSave = () => {
     onSave({
       id: testCase?.id || Date.now().toString(),
-      name: name.trim(),
-      folderId: testCase?.folderId,
+      name,
       interactions,
+      folderId: testCase?.folderId,
     });
   };
 
@@ -421,10 +273,7 @@ export const TestEditor: React.FC<TestEditorProps> = ({
     <div className="bg-white rounded-lg shadow-lg p-4">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-2">
-          <button
-            onClick={onCancel}
-            className="text-gray-600 hover:text-gray-800"
-          >
+          <button onClick={onCancel} className="text-gray-600 hover:text-gray-800">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <h2 className="text-lg font-semibold text-gray-800">
@@ -441,9 +290,7 @@ export const TestEditor: React.FC<TestEditorProps> = ({
       </div>
       <div className="space-y-6 max-h-[calc(100vh-12rem)] overflow-y-auto">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Test Case Name
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1"> Test Case Name </label>
           <input
             type="text"
             value={name}
@@ -464,19 +311,57 @@ export const TestEditor: React.FC<TestEditorProps> = ({
             </button>
           </div>
           {interactions.map((interaction, index) => (
-            <InteractionItem
-              key={index}
-              index={index}
-              interaction={interaction}
-              onUpdate={(updated) => handleUpdateInteraction(index, updated)}
-              onDelete={() => handleDeleteInteraction(index)}
-              onDuplicate={() => handleDuplicateInteraction(index)}
-              onUserMessageChange={(msg) => {
-                const newInteraction = { ...interaction, userMessage: msg };
-                handleUpdateInteraction(index, newInteraction);
-              }}
-              onReorder={handleReorderInteraction}
-            />
+            <div key={index} className="space-y-4 p-4 bg-white border rounded-lg">
+              <div className="flex justify-between items-center">
+                <h4 className="font-medium">Interaction {index + 1}</h4>
+                <button
+                  onClick={() => handleDeleteInteraction(index)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1"> User Message </label>
+                <textarea
+                  value={interaction.userMessage}
+                  onChange={(e) =>
+                    handleUpdateInteraction(index, {
+                      ...interaction,
+                      userMessage: e.target.value,
+                    })
+                  }
+                  rows={3}
+                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 resize-none"
+                  placeholder="Enter user message"
+                />
+              </div>
+              <div className="space-y-4">
+                {interaction.expectedResponses.map((response, respIndex) => (
+                  <ResponseEditor
+                    key={respIndex}
+                    response={response}
+                    onUpdate={(updatedResponse) => {
+                      const newInteractions = [...interactions];
+                      newInteractions[index].expectedResponses[respIndex] = updatedResponse;
+                      setInteractions(newInteractions);
+                    }}
+                    onDelete={() => {
+                      const newInteractions = [...interactions];
+                      newInteractions[index].expectedResponses.splice(respIndex, 1);
+                      setInteractions(newInteractions);
+                    }}
+                  />
+                ))}
+                <button
+                  onClick={() => handleAddResponse(index)}
+                  className="flex items-center space-x-1 text-green-500 hover:text-green-700"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add Response</span>
+                </button>
+              </div>
+            </div>
           ))}
         </div>
       </div>

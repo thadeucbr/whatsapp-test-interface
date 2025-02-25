@@ -11,23 +11,29 @@ export interface Row {
   rowId: string;
 }
 
+export interface InteractiveOption {
+  name: string;
+  displayText: string;
+  url: string;
+}
+
 export interface MessageBody {
   text: string;
   buttonText: string | null;
-  options: Array<Row> | Array<Button> | null;
+  options: Array<Row> | Array<Button> | InteractiveOption[] | null;
 }
 
 export interface IncomingMessageDTO {
   from: string;
   body: MessageBody;
   timestamp: number;
-  type: 'text' | 'button' | 'list';
+  type: 'text' | 'button' | 'list' | 'interactive';
 }
 
 export interface Folder {
   id: string;
   name: string;
-  testCaseIds: string[];
+  parentId?: string | null;
 }
 
 export interface TestCase {
@@ -47,8 +53,8 @@ export interface Message {
   content: string;
   timestamp: number;
   isUser: boolean;
-  type: 'text' | 'button' | 'list';
-  options?: Array<Row> | Array<Button>;
+  type: 'text' | 'button' | 'list' | 'interactive';
+  options?: Array<Row> | Array<Button> | InteractiveOption[];
   buttonText?: string;
   phoneNumber?: string;
 }

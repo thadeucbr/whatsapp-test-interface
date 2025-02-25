@@ -2,10 +2,11 @@ import React from 'react';
 import { useStore } from '../store';
 import { sendMessage } from '../socket';
 import { Send, Play, AlertCircle, CheckCircle } from 'lucide-react';
-import { Message, TestInteraction, Button, Row } from '../types';
+import { Message, TestInteraction, IncomingMessageDTO, InteractiveOption } from '../types';
 
 interface TestResult {
   interactionIndex: number;
+  responseIndex: number;
   success: boolean;
   error?: string;
   details?: {
@@ -18,10 +19,165 @@ interface TestResult {
 export const TestRunner: React.FC = () => {
   const [message, setMessage] = React.useState('');
   const [currentInteractionIndex, setCurrentInteractionIndex] = React.useState<number>(-1);
+  const [currentResponseIndex, setCurrentResponseIndex] = React.useState<number>(-1);
   const [testResults, setTestResults] = React.useState<TestResult[]>([]);
   const { testCases, currentTestId, connected, messages } = useStore();
   const currentTest = testCases.find((tc) => tc.id === currentTestId);
   const lastMessageRef = React.useRef<Message | null>(null);
+
+  const compareOptions = (
+    expected: any[],
+    received: any[],
+    type: 'button' | 'list' | 'interactive'
+  ): { success: boolean; error?: string; details?: any[] } => {
+    if (expected.length !== received.length) {
+      return {
+        success: false,
+        error: `Expected ${expected.length} ${type}s but received ${received.length}`,
+      };
+    }
+
+    const details: { field: string; expected: string; received: string }[] = [];
+
+    for (let i = 0; i < expected.length; i++) {
+      if (type === 'button') {
+        const expectedButton = expected[i] as { text: string };
+        const receivedButton = received[i] as { text: string };
+
+        if (expectedButton.text !== receivedButton.text) {
+          details.push({
+            field: `Button ${i + 1} text`,
+            expected: expectedButton.text,
+            received: receivedButton.text,
+          });
+        }
+      } else if (type === 'list') {
+        const expectedRow = expected[i] as { title: string; description: string };
+        const receivedRow = received[i] as { title: string; description: string };
+        const expectedButtonText = (expectedRow as any).buttonText;
+        const receivedButtonText = (receivedRow as any).buttonText;
+
+        if (expectedRow.title !== receivedRow.title) {
+          details.push({
+            field: `List item ${i + 1} title`,
+            expected: expectedRow.title,
+            received: receivedRow.title,
+          });
+        }
+
+        if (expectedRow.description !== receivedRow.description) {
+          details.push({
+            field: `List item ${i + 1} description`,
+            expected: expectedRow.description,
+            received: receivedRow.description,
+          });
+        }
+
+        if (expectedButtonText !== receivedButtonText) {
+          details.push({
+            field: `List item ${i + 1} button text`,
+            expected: expectedButtonText || 'null',
+            received: receivedButtonText || 'null',
+          });
+        }
+      } else if (type === 'interactive') {
+        const expectedOption = expected[i] as { displayText: string; url: string };
+        const receivedOption = received[i] as { displayText: string; url: string };
+
+        if (expectedOption.displayText !== receivedOption.displayText) {
+          details.push({
+            field: `Interactive option ${i + 1} display text`,
+            expected: expectedOption.displayText,
+            received: receivedOption.displayText,
+          });
+        }
+
+        if (expectedOption.url !== receivedOption.url) {
+          details.push({
+            field: `Interactive option ${i + 1} URL`,
+            expected: expectedOption.url,
+            received: receivedOption.url,
+          });
+        }
+      }
+    }
+
+    return {
+      success: details.length === 0,
+      error: details.length > 0 ? `${type} content mismatch` : undefined,
+      details: details.length > 0 ? details : undefined,
+    };
+  };
+
+  const verifySingleResponse = (expected: IncomingMessageDTO, receivedMessage: Message): TestResult => {
+    const result: TestResult = {
+      interactionIndex: currentInteractionIndex,
+      responseIndex: currentResponseIndex,
+      success: true,
+    };
+
+    if (expected.type !== receivedMessage.type) {
+      return {
+        ...result,
+        success: false,
+        error: `Message type mismatch`,
+        details: [
+          {
+            field: 'Message type',
+            expected: expected.type,
+            received: receivedMessage.type,
+          },
+        ],
+      };
+    }
+
+    if (expected.body.text !== receivedMessage.content) {
+      return {
+        ...result,
+        success: false,
+        error: 'Message content mismatch',
+        details: [
+          {
+            field: 'Message text',
+            expected: expected.body.text,
+            received: receivedMessage.content,
+          },
+        ],
+      };
+    }
+
+    if (expected.type === 'list') {
+      if (expected.body.buttonText !== receivedMessage.buttonText) {
+        return {
+          ...result,
+          success: false,
+          error: 'Button text mismatch',
+          details: [
+            {
+              field: 'Button text',
+              expected: expected.body.buttonText || 'null',
+              received: receivedMessage.buttonText || 'null',
+            },
+          ],
+        };
+      }
+    }
+
+    if (expected.type !== 'text' && expected.body.options) {
+      const optionsComparison = compareOptions(expected.body.options, receivedMessage.options || [], expected.type);
+
+      if (!optionsComparison.success) {
+        return {
+          ...result,
+          success: false,
+          error: optionsComparison.error,
+          details: optionsComparison.details,
+        };
+      }
+    }
+
+    return result;
+  };
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,190 +187,63 @@ export const TestRunner: React.FC = () => {
     }
   };
 
-const compareOptions = (
-  expected: any[],
-  received: any[],
-  type: 'button' | 'list' | 'interactive'
-): { success: boolean; error?: string; details?: any[] } => {
-  if (expected.length !== received.length) {
-    return {
-      success: false,
-      error: `Esperado ${expected.length} ${type}s mas recebido ${received.length}`,
-    };
-  }
-
-  const details: { field: string; expected: string; received: string }[] = [];
-
-  for (let i = 0; i < expected.length; i++) {
-    if (type === 'button') {
-      const expectedButton = expected[i] as Button;
-      const receivedButton = received[i] as Button;
-
-      if (expectedButton.text !== receivedButton.text) {
-        details.push({
-          field: `Botão ${i + 1} texto`,
-          expected: expectedButton.text,
-          received: receivedButton.text,
-        });
-      }
-    } else if (type === 'list') {
-      const expectedRow = expected[i] as Row;
-      const receivedRow = received[i] as Row;
-
-      if (expectedRow.title !== receivedRow.title) {
-        details.push({
-          field: `Item da lista ${i + 1} título`,
-          expected: expectedRow.title,
-          received: receivedRow.title,
-        });
-      }
-
-      if (expectedRow.description !== receivedRow.description) {
-        details.push({
-          field: `Item da lista ${i + 1} descrição`,
-          expected: expectedRow.description,
-          received: receivedRow.description,
-        });
-      }
-    } else if (type === 'interactive') {
-      const expectedOption = expected[i];
-      const receivedOption = received[i];
-
-      if (expectedOption.displayText !== receivedOption.displayText) {
-        details.push({
-          field: `Opção ${i + 1} displayText`,
-          expected: expectedOption.displayText,
-          received: receivedOption.displayText,
-        });
-      }
-
-      if (expectedOption.url !== receivedOption.url) {
-        details.push({
-          field: `Opção ${i + 1} URL`,
-          expected: expectedOption.url,
-          received: receivedOption.url,
-        });
-      }
-    }
-  }
-
-  return {
-    success: details.length === 0,
-    error: details.length > 0 ? `Conteúdo do ${type} não corresponde` : undefined,
-    details: details.length > 0 ? details : undefined,
-  };
-};
-
-const verifyResponse = (interaction: TestInteraction, receivedMessage: Message): TestResult => {
-  const expected = interaction.expectedResponses[0];
-  const result: TestResult = {
-    interactionIndex: currentInteractionIndex,
-    success: true,
-  };
-
-  // Verify the message type
-  if (expected.type !== receivedMessage.type) {
-    return {
-      ...result,
-      success: false,
-      error: `Message type does not match`,
-      details: [{
-        field: 'Message type',
-        expected: expected.type,
-        received: receivedMessage.type,
-      }],
-    };
-  }
-
-  // Verify the text content
-  if (expected.body.text !== receivedMessage.content) {
-    return {
-      ...result,
-      success: false,
-      error: 'Message content does not match',
-      details: [{
-        field: 'Message text',
-        expected: expected.body.text,
-        received: receivedMessage.content,
-      }],
-    };
-  }
-
-  // Verify buttons, lists, or interactives if present
-  if (expected.type !== 'text' && expected.body.options) {
-    const optionsComparison = compareOptions(
-      expected.body.options,
-      receivedMessage.options || [],
-      expected.type as 'button' | 'list' | 'interactive' // Includes 'interactive'
-    );
-
-    if (!optionsComparison.success) {
-      return {
-        ...result,
-        success: false,
-        error: optionsComparison.error,
-        details: optionsComparison.details,
-      };
-    }
-
-    // For 'list' type, verify the button text if present
-    if (expected.type === 'list' && expected.body.buttonText !== receivedMessage.buttonText) {
-      return {
-        ...result,
-        success: false,
-        error: 'List button text does not match',
-        details: [{
-          field: 'Button text',
-          expected: expected.body.buttonText || '',
-          received: receivedMessage.buttonText || '',
-        }],
-      };
-    }
-  }
-
-  return result;
-};
-
   const runTest = () => {
     if (currentTest && currentTest.interactions.length > 0) {
       setCurrentInteractionIndex(0);
+      setCurrentResponseIndex(0);
       setTestResults([]);
       const interaction = currentTest.interactions[0];
-      sendMessage(interaction.userMessage);
+      if (interaction.expectedResponses.length > 0) {
+        sendMessage(interaction.userMessage);
+      }
     }
   };
 
   React.useEffect(() => {
-    if (currentInteractionIndex >= 0 && currentTest) {
-      const currentMessage = messages[messages.length - 1];
-      
-      if (currentMessage && currentMessage !== lastMessageRef.current && !currentMessage.isUser) {
-        lastMessageRef.current = currentMessage;
-        const currentInteraction = currentTest.interactions[currentInteractionIndex];
-        const result = verifyResponse(currentInteraction, currentMessage);
-        setTestResults(prev => [...prev, result]);
+    if (currentInteractionIndex === -1 || currentResponseIndex === -1 || !currentTest) return;
 
-        if (result.success) {
-          const timer = setTimeout(() => {
-            if (currentInteractionIndex < currentTest.interactions.length - 1) {
-              setCurrentInteractionIndex(currentInteractionIndex + 1);
-              const nextInteraction = currentTest.interactions[currentInteractionIndex + 1];
-              sendMessage(nextInteraction.userMessage);
-            } else {
-              setCurrentInteractionIndex(-1);
-            }
-          }, 2000);
-          return () => clearTimeout(timer);
+    const currentMessage = messages[messages.length - 1];
+
+    if (currentMessage && currentMessage !== lastMessageRef.current && !currentMessage.isUser) {
+      lastMessageRef.current = currentMessage;
+      const currentInteraction = currentTest.interactions[currentInteractionIndex];
+      const expectedResponse = currentInteraction.expectedResponses[currentResponseIndex];
+
+      const result = verifySingleResponse(expectedResponse, currentMessage);
+      setTestResults((prev) => [...prev, result]);
+
+      if (result.success) {
+        if (currentResponseIndex < currentInteraction.expectedResponses.length - 1) {
+          // Avançar para a próxima resposta dentro da mesma interação
+          const nextResponseIndex = currentResponseIndex + 1;
+          setCurrentResponseIndex(nextResponseIndex);
         } else {
-          setCurrentInteractionIndex(-1);
+          // Avançar para a próxima interação somente se existir
+          if (currentInteractionIndex < currentTest.interactions.length - 1) {
+            const nextInteractionIndex = currentInteractionIndex + 1;
+            const nextInteraction = currentTest.interactions[nextInteractionIndex];
+            setCurrentInteractionIndex(nextInteractionIndex);
+            setCurrentResponseIndex(0);
+            setTimeout(() => {
+              sendMessage(nextInteraction.userMessage);
+            }, 2000);
+          } else {
+            // Teste concluído, não enviar mais mensagens
+            setCurrentInteractionIndex(-1);
+            setCurrentResponseIndex(-1);
+          }
         }
+      } else {
+        // Falha na verificação
+        setCurrentInteractionIndex(-1);
+        setCurrentResponseIndex(-1);
       }
     }
-  }, [currentInteractionIndex, currentTest, messages]);
+  }, [currentInteractionIndex, currentResponseIndex, currentTest, messages]);
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-4">
-      <div className="mb-4">
+    <div className="flex-1 bg-white rounded-lg shadow-lg overflow-hidden flex flex-col h-[calc(60vh-12rem)]">
+      <div className="p-4 bg-gray-50 border-b">
         <h2 className="text-lg font-semibold text-gray-800">Test Runner</h2>
         <div className="flex items-center mt-2">
           <div
@@ -228,7 +257,7 @@ const verifyResponse = (interaction: TestInteraction, receivedMessage: Message):
         </div>
       </div>
       {currentTest ? (
-        <div className="space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-medium">{currentTest.name}</h3>
             {currentTest.interactions.length > 0 && (
@@ -258,10 +287,11 @@ const verifyResponse = (interaction: TestInteraction, receivedMessage: Message):
               <Send className="w-5 h-5" />
             </button>
           </form>
-          {currentInteractionIndex !== -1 && (
+          {currentInteractionIndex !== -1 && currentResponseIndex !== -1 && (
             <div className="text-sm text-gray-600">
               Running interaction {currentInteractionIndex + 1} of{' '}
-              {currentTest.interactions.length}...
+              {currentTest.interactions.length}, response {currentResponseIndex + 1} of{' '}
+              {currentTest.interactions[currentInteractionIndex].expectedResponses.length}...
             </div>
           )}
           {testResults.length > 0 && (
@@ -281,10 +311,12 @@ const verifyResponse = (interaction: TestInteraction, receivedMessage: Message):
                       <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
                     )}
                     <div className="flex-1">
-                      <p className={`font-medium ${
-                        result.success ? 'text-green-800' : 'text-red-800'
-                      }`}>
-                        Interaction {result.interactionIndex + 1}:{' '}
+                      <p
+                        className={`font-medium ${
+                          result.success ? 'text-green-800' : 'text-red-800'
+                        }`}
+                      >
+                        Interaction {result.interactionIndex + 1}, Response {result.responseIndex + 1}:{' '}
                         {result.success ? 'Success' : 'Failed'}
                       </p>
                       {!result.success && result.details && (
@@ -315,7 +347,9 @@ const verifyResponse = (interaction: TestInteraction, receivedMessage: Message):
           )}
         </div>
       ) : (
-        <p className="text-gray-500">Select a test case to begin testing</p>
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-gray-500">Select a test case to begin testing</p>
+        </div>
       )}
     </div>
   );
