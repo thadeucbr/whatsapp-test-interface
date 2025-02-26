@@ -2,6 +2,7 @@ import React from 'react';
 import { useStore } from '../store';
 import { ChatPanel } from '../components/ChatPanel';
 import { Star, AlertCircle, Lightbulb, Brain } from 'lucide-react';
+import axios from 'axios';
 
 interface Rating {
   category: string;
@@ -22,7 +23,7 @@ export const AIAnalysis: React.FC = () => {
   const handleStartAnalysis = async () => {
     setIsAnalyzing(true);
 
-    // Converte a conversa para o formato esperado pelo endpoint oficial
+    // Converte a conversa para o formato esperado pelo endpoint
     const conversation = store.messages
       .filter((msg) => msg.phoneNumber === store.selectedPhoneNumber)
       .map((msg) => ({
@@ -51,27 +52,14 @@ Não retorne nenhuma outra informação além do JSON.`,
     ];
 
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer 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`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: messages,
-          temperature: 0.7,
-        }),
+      const response = await axios.post('https://whatsappapi.barbudas.com/api/v1/ai', {
+        messages: messages,
+        model: 'gpt-4o-mini',
+        temperature: 0.7,
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch analysis');
-      }
-
-      const data = await response.json();
-      const outputText = data.choices[0].message.content;
-      // Tenta converter a resposta para JSON
-      const analysisData: Analysis = JSON.parse(outputText);
+      
+      // Supondo que a resposta já venha no formato JSON desejado
+      const analysisData: Analysis = response.data;
       setAnalysis(analysisData);
     } catch (error) {
       console.error(error);
