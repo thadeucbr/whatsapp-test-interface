@@ -31,6 +31,9 @@ export const useStore = create<Store>((set, get) => ({
   connected: false,
   phoneNumbers: [],
   selectedPhoneNumber: null,
+  recordingTestCase: null,
+  setRecordingTestCase: (testCase: TestCase | null) =>
+    set({ recordingTestCase: testCase }),
   addTestCase: (testCase) =>
     set((state) => {
       const newTestCases = [...state.testCases, testCase];
@@ -39,7 +42,9 @@ export const useStore = create<Store>((set, get) => ({
     }),
   updateTestCase: (testCase) =>
     set((state) => {
-      const newTestCases = state.testCases.map((tc) => (tc.id === testCase.id ? testCase : tc));
+      const newTestCases = state.testCases.map((tc) =>
+        tc.id === testCase.id ? testCase : tc
+      );
       localStorage.setItem('testCases', JSON.stringify(newTestCases));
       return { testCases: newTestCases };
     }),
@@ -50,8 +55,7 @@ export const useStore = create<Store>((set, get) => ({
       return { testCases: newTestCases };
     }),
   setCurrentTestId: (id) => set({ currentTestId: id }),
-  addMessage: (message) =>
-    set((state) => ({ messages: [...state.messages, message] })),
+  addMessage: (message) => set((state) => ({ messages: [...state.messages, message] })),
   clearMessages: () => set({ messages: [] }),
   setConnected: (status) => set({ connected: status }),
   setPhoneNumbers: (numbers) => set({ phoneNumbers: numbers }),
