@@ -37,10 +37,10 @@ export const AIAnalysis: React.FC = () => {
         content: `Você deve analisar a conversa a seguir e retornar um JSON com a seguinte estrutura:
 {
   "ratings": [
-    { "category": "Ease of Use", "score": number, "justification": string },
-    { "category": "Persona Consistency", "score": number, "justification": string },
-    { "category": "Writing Quality", "score": number, "justification": string },
-    { "category": "Overall", "score": number, "justification": string }
+    { "category": "Ease of Use", "score": number(0-5), "justification": string },
+    { "category": "Persona Consistency", "score": number(0-5), "justification": string },
+    { "category": "Writing Quality", "score": number(0-5), "justification": string },
+    { "category": "Overall", "score": number(0-5), "justification": string }
   ],
   "suggestions": string[]
 }
@@ -55,10 +55,10 @@ Não retorne nenhuma outra informação além do JSON.`,
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer`,
+          'Authorization': `Bearer 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`,
         },
         body: JSON.stringify({
-          model: 'gpt-4',
+          model: 'gpt-4o-mini',
           messages: messages,
           temperature: 0.7,
         }),

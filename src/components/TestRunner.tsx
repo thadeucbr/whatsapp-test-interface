@@ -11,9 +11,18 @@ export const TestRunner: React.FC = () => {
   const [currentInteractionIndex, setCurrentInteractionIndex] = React.useState<number>(-1);
   const [currentResponseIndex, setCurrentResponseIndex] = React.useState<number>(-1);
   const [testResults, setTestResults] = React.useState<TestResultType[]>([]);
-  const { testCases, currentTestId, connected, messages } = useStore();
-  const currentTest = testCases.find((tc) => tc.id === currentTestId);
+  const { testCases, currentTestId, connected, messages, recordingTestCase } = useStore();
+  // Se estiver gravando um teste, utiliza-o; caso contrário, utiliza o teste selecionado
+  const currentTest = recordingTestCase || testCases.find((tc) => tc.id === currentTestId);
   const lastMessageRef = React.useRef<Message | null>(null);
+  const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
+
+  // Ao iniciar a gravação, foca automaticamente no chatbox para digitação
+  React.useEffect(() => {
+    if (recordingTestCase && textAreaRef.current) {
+      textAreaRef.current.focus();
+    }
+  }, [recordingTestCase]);
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,10 +64,8 @@ export const TestRunner: React.FC = () => {
 
       if (result.success) {
         if (currentResponseIndex < currentInteraction.expectedResponses.length - 1) {
-          // Próxima resposta na mesma interação
           setCurrentResponseIndex(currentResponseIndex + 1);
         } else {
-          // Próxima interação, se houver
           if (currentInteractionIndex < currentTest.interactions.length - 1) {
             const nextInteractionIndex = currentInteractionIndex + 1;
             const nextInteraction = currentTest.interactions[nextInteractionIndex];
@@ -68,13 +75,11 @@ export const TestRunner: React.FC = () => {
               sendMessage(nextInteraction.userMessage);
             }, 2000);
           } else {
-            // Teste concluído
             setCurrentInteractionIndex(-1);
             setCurrentResponseIndex(-1);
           }
         }
       } else {
-        // Se a verificação falhar, interrompe o teste
         setCurrentInteractionIndex(-1);
         setCurrentResponseIndex(-1);
       }
@@ -107,6 +112,7 @@ export const TestRunner: React.FC = () => {
           </div>
           <form onSubmit={handleSend} className="flex space-x-2">
             <textarea
+              ref={textAreaRef}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={(e) => {
