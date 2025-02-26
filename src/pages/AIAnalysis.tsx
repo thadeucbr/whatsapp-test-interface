@@ -20,16 +20,26 @@ export const AIAnalysis: React.FC = () => {
   const [analysis, setAnalysis] = React.useState<Analysis | null>(null);
   const store = useStore();
 
+  // Filtra as mensagens da conversa do número selecionado
+  const conversation = React.useMemo(() => {
+    return store.messages.filter(
+      (msg) => msg.phoneNumber === store.selectedPhoneNumber
+    );
+  }, [store.messages, store.selectedPhoneNumber]);
+
   const handleStartAnalysis = async () => {
+    if (conversation.length === 0) {
+      alert('Nenhuma conversa encontrada para análise.');
+      return;
+    }
+
     setIsAnalyzing(true);
 
     // Converte a conversa para o formato esperado pelo endpoint
-    const conversation = store.messages
-      .filter((msg) => msg.phoneNumber === store.selectedPhoneNumber)
-      .map((msg) => ({
-        role: msg.isUser ? 'user' : 'assistant',
-        content: msg.content,
-      }));
+    const formattedConversation = conversation.map((msg) => ({
+      role: msg.isUser ? 'user' : 'assistant',
+      content: msg.content,
+    }));
 
     // Instrução de sistema que orienta o GPT-4 a retornar a análise desejada
     const messages = [
@@ -48,7 +58,7 @@ export const AIAnalysis: React.FC = () => {
 
 Não retorne nenhuma outra informação além do JSON.`,
       },
-      ...conversation,
+      ...formattedConversation,
     ];
 
     try {
@@ -97,7 +107,7 @@ Não retorne nenhuma outra informação além do JSON.`,
         <div className="max-w-md">
           <button
             onClick={handleStartAnalysis}
-            disabled={isAnalyzing}
+            disabled={isAnalyzing || conversation.length === 0}
             className="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
             {isAnalyzing ? 'Analyzing...' : 'Start Analysis'}
