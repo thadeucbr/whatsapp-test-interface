@@ -1,183 +1,19 @@
 import React from 'react';
 import { useStore } from '../store';
 import { sendMessage } from '../socket';
-import { Send, Play, AlertCircle, CheckCircle } from 'lucide-react';
-import { Message, TestInteraction, IncomingMessageDTO, InteractiveOption } from '../types';
-
-interface TestResult {
-  interactionIndex: number;
-  responseIndex: number;
-  success: boolean;
-  error?: string;
-  details?: {
-    field: string;
-    expected: string;
-    received: string;
-  }[];
-}
+import { Send, Play } from 'lucide-react';
+import { Message, IncomingMessageDTO } from '../types';
+import { verifySingleResponse, TestResult as TestResultType } from '../utils/testRunnerUtils';
+import { TestResultItem } from './TestResultItem';
 
 export const TestRunner: React.FC = () => {
   const [message, setMessage] = React.useState('');
   const [currentInteractionIndex, setCurrentInteractionIndex] = React.useState<number>(-1);
   const [currentResponseIndex, setCurrentResponseIndex] = React.useState<number>(-1);
-  const [testResults, setTestResults] = React.useState<TestResult[]>([]);
+  const [testResults, setTestResults] = React.useState<TestResultType[]>([]);
   const { testCases, currentTestId, connected, messages } = useStore();
   const currentTest = testCases.find((tc) => tc.id === currentTestId);
   const lastMessageRef = React.useRef<Message | null>(null);
-
-  const compareOptions = (
-    expected: any[],
-    received: any[],
-    type: 'button' | 'list' | 'interactive'
-  ): { success: boolean; error?: string; details?: any[] } => {
-    if (expected.length !== received.length) {
-      return {
-        success: false,
-        error: `Expected ${expected.length} ${type}s but received ${received.length}`,
-      };
-    }
-
-    const details: { field: string; expected: string; received: string }[] = [];
-
-    for (let i = 0; i < expected.length; i++) {
-      if (type === 'button') {
-        const expectedButton = expected[i] as { text: string };
-        const receivedButton = received[i] as { text: string };
-
-        if (expectedButton.text !== receivedButton.text) {
-          details.push({
-            field: `Button ${i + 1} text`,
-            expected: expectedButton.text,
-            received: receivedButton.text,
-          });
-        }
-      } else if (type === 'list') {
-        const expectedRow = expected[i] as { title: string; description: string };
-        const receivedRow = received[i] as { title: string; description: string };
-        const expectedButtonText = (expectedRow as any).buttonText;
-        const receivedButtonText = (receivedRow as any).buttonText;
-
-        if (expectedRow.title !== receivedRow.title) {
-          details.push({
-            field: `List item ${i + 1} title`,
-            expected: expectedRow.title,
-            received: receivedRow.title,
-          });
-        }
-
-        if (expectedRow.description !== receivedRow.description) {
-          details.push({
-            field: `List item ${i + 1} description`,
-            expected: expectedRow.description,
-            received: receivedRow.description,
-          });
-        }
-
-        if (expectedButtonText !== receivedButtonText) {
-          details.push({
-            field: `List item ${i + 1} button text`,
-            expected: expectedButtonText || 'null',
-            received: receivedButtonText || 'null',
-          });
-        }
-      } else if (type === 'interactive') {
-        const expectedOption = expected[i] as { displayText: string; url: string };
-        const receivedOption = received[i] as { displayText: string; url: string };
-
-        if (expectedOption.displayText !== receivedOption.displayText) {
-          details.push({
-            field: `Interactive option ${i + 1} display text`,
-            expected: expectedOption.displayText,
-            received: receivedOption.displayText,
-          });
-        }
-
-        if (expectedOption.url !== receivedOption.url) {
-          details.push({
-            field: `Interactive option ${i + 1} URL`,
-            expected: expectedOption.url,
-            received: receivedOption.url,
-          });
-        }
-      }
-    }
-
-    return {
-      success: details.length === 0,
-      error: details.length > 0 ? `${type} content mismatch` : undefined,
-      details: details.length > 0 ? details : undefined,
-    };
-  };
-
-  const verifySingleResponse = (expected: IncomingMessageDTO, receivedMessage: Message): TestResult => {
-    const result: TestResult = {
-      interactionIndex: currentInteractionIndex,
-      responseIndex: currentResponseIndex,
-      success: true,
-    };
-
-    if (expected.type !== receivedMessage.type) {
-      return {
-        ...result,
-        success: false,
-        error: `Message type mismatch`,
-        details: [
-          {
-            field: 'Message type',
-            expected: expected.type,
-            received: receivedMessage.type,
-          },
-        ],
-      };
-    }
-
-    if (expected.body.text !== receivedMessage.content) {
-      return {
-        ...result,
-        success: false,
-        error: 'Message content mismatch',
-        details: [
-          {
-            field: 'Message text',
-            expected: expected.body.text,
-            received: receivedMessage.content,
-          },
-        ],
-      };
-    }
-
-    if (expected.type === 'list') {
-      if (expected.body.buttonText !== receivedMessage.buttonText) {
-        return {
-          ...result,
-          success: false,
-          error: 'Button text mismatch',
-          details: [
-            {
-              field: 'Button text',
-              expected: expected.body.buttonText || 'null',
-              received: receivedMessage.buttonText || 'null',
-            },
-          ],
-        };
-      }
-    }
-
-    if (expected.type !== 'text' && expected.body.options) {
-      const optionsComparison = compareOptions(expected.body.options, receivedMessage.options || [], expected.type);
-
-      if (!optionsComparison.success) {
-        return {
-          ...result,
-          success: false,
-          error: optionsComparison.error,
-          details: optionsComparison.details,
-        };
-      }
-    }
-
-    return result;
-  };
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,16 +45,20 @@ export const TestRunner: React.FC = () => {
       const currentInteraction = currentTest.interactions[currentInteractionIndex];
       const expectedResponse = currentInteraction.expectedResponses[currentResponseIndex];
 
-      const result = verifySingleResponse(expectedResponse, currentMessage);
+      const result = verifySingleResponse(
+        expectedResponse,
+        currentMessage,
+        currentInteractionIndex,
+        currentResponseIndex
+      );
       setTestResults((prev) => [...prev, result]);
 
       if (result.success) {
         if (currentResponseIndex < currentInteraction.expectedResponses.length - 1) {
-          // Avançar para a próxima resposta dentro da mesma interação
-          const nextResponseIndex = currentResponseIndex + 1;
-          setCurrentResponseIndex(nextResponseIndex);
+          // Próxima resposta na mesma interação
+          setCurrentResponseIndex(currentResponseIndex + 1);
         } else {
-          // Avançar para a próxima interação somente se existir
+          // Próxima interação, se houver
           if (currentInteractionIndex < currentTest.interactions.length - 1) {
             const nextInteractionIndex = currentInteractionIndex + 1;
             const nextInteraction = currentTest.interactions[nextInteractionIndex];
@@ -228,13 +68,13 @@ export const TestRunner: React.FC = () => {
               sendMessage(nextInteraction.userMessage);
             }, 2000);
           } else {
-            // Teste concluído, não enviar mais mensagens
+            // Teste concluído
             setCurrentInteractionIndex(-1);
             setCurrentResponseIndex(-1);
           }
         }
       } else {
-        // Falha na verificação
+        // Se a verificação falhar, interrompe o teste
         setCurrentInteractionIndex(-1);
         setCurrentResponseIndex(-1);
       }
@@ -246,14 +86,8 @@ export const TestRunner: React.FC = () => {
       <div className="p-4 bg-gray-50 border-b">
         <h2 className="text-lg font-semibold text-gray-800">Test Runner</h2>
         <div className="flex items-center mt-2">
-          <div
-            className={`w-3 h-3 rounded-full mr-2 ${
-              connected ? 'bg-green-500' : 'bg-red-500'
-            }`}
-          />
-          <span className="text-sm text-gray-600">
-            {connected ? 'Connected' : 'Disconnected'}
-          </span>
+          <div className={`w-3 h-3 rounded-full mr-2 ${connected ? 'bg-green-500' : 'bg-red-500'}`} />
+          <span className="text-sm text-gray-600">{connected ? 'Connected' : 'Disconnected'}</span>
         </div>
       </div>
       {currentTest ? (
@@ -278,7 +112,7 @@ export const TestRunner: React.FC = () => {
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
-                  handleSend(e as any);
+                  handleSend(e);
                 }
               }}
               placeholder="Type a message..."
@@ -295,9 +129,8 @@ export const TestRunner: React.FC = () => {
           </form>
           {currentInteractionIndex !== -1 && currentResponseIndex !== -1 && (
             <div className="text-sm text-gray-600">
-              Running interaction {currentInteractionIndex + 1} of{' '}
-              {currentTest.interactions.length}, response {currentResponseIndex + 1} of{' '}
-              {currentTest.interactions[currentInteractionIndex].expectedResponses.length}...
+              Running interaction {currentInteractionIndex + 1} of {currentTest.interactions.length}, response{' '}
+              {currentResponseIndex + 1} of {currentTest.interactions[currentInteractionIndex].expectedResponses.length}...
             </div>
           )}
           {testResults.length > 0 && (
@@ -305,48 +138,7 @@ export const TestRunner: React.FC = () => {
               <h4 className="font-medium text-gray-800">Test Results</h4>
               <div className="space-y-2">
                 {testResults.map((result, index) => (
-                  <div
-                    key={index}
-                    className={`p-3 rounded-lg flex items-start space-x-3 ${
-                      result.success ? 'bg-green-50' : 'bg-red-50'
-                    }`}
-                  >
-                    {result.success ? (
-                      <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    ) : (
-                      <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-                    )}
-                    <div className="flex-1">
-                      <p
-                        className={`font-medium ${
-                          result.success ? 'text-green-800' : 'text-red-800'
-                        }`}
-                      >
-                        Interaction {result.interactionIndex + 1}, Response {result.responseIndex + 1}:{' '}
-                        {result.success ? 'Success' : 'Failed'}
-                      </p>
-                      {!result.success && result.details && (
-                        <div className="mt-2 space-y-3 text-sm text-red-700">
-                          <p className="font-medium">{result.error}</p>
-                          {result.details.map((detail, i) => (
-                            <div key={i} className="space-y-1 pl-4 border-l-2 border-red-200">
-                              <p className="font-medium">{detail.field}:</p>
-                              <div className="space-y-1">
-                                <div>
-                                  <span className="font-medium">Expected: </span>
-                                  <pre className="inline bg-red-100 px-1 rounded">{detail.expected}</pre>
-                                </div>
-                                <div>
-                                  <span className="font-medium">Received: </span>
-                                  <pre className="inline bg-red-100 px-1 rounded">{detail.received}</pre>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  <TestResultItem key={index} result={result} />
                 ))}
               </div>
             </div>

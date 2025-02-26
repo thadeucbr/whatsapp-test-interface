@@ -1,223 +1,13 @@
 import React from 'react';
 import { Plus, Trash2, ArrowLeft, Save } from 'lucide-react';
-import { TestCase, TestInteraction, IncomingMessageDTO } from '../types';
+import { TestCase, TestInteraction } from '../types';
+import { ResponseEditor } from './ResponseEditor';
 
-interface TestEditorProps {
+export interface TestEditorProps {
   testCase: TestCase | null;
   onSave: (testCase: TestCase) => void;
   onCancel: () => void;
 }
-
-interface ResponseEditorProps {
-  response: IncomingMessageDTO;
-  onUpdate: (updatedResponse: IncomingMessageDTO) => void;
-  onDelete: () => void;
-}
-
-const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpdate, onDelete }) => {
-  const [type, setType] = React.useState<'text' | 'button' | 'list' | 'interactive'>(response.type);
-  const [text, setText] = React.useState(response.body.text);
-  const [buttonText, setButtonText] = React.useState(response.body.buttonText || '');
-  const [options, setOptions] = React.useState<Array<any>>(response.body.options || []);
-
-  const handleUpdate = () => {
-    const updatedBody: any = {
-      text: text.trim(),
-    };
-
-    if (type === 'list') {
-      updatedBody.buttonText = buttonText.trim() || null;
-    }
-
-    if (type !== 'text') {
-      updatedBody.options = options.length > 0 ? options : null;
-    } else {
-      updatedBody.options = null;
-    }
-
-    const updatedResponse: IncomingMessageDTO = {
-      ...response,
-      type,
-      body: updatedBody,
-      timestamp: Date.now(),
-    };
-    onUpdate(updatedResponse);
-  };
-
-  const handleOptionAdd = () => {
-    if (type === 'button') {
-      setOptions([...options, { id: Date.now().toString(), text: '' }]);
-    } else if (type === 'list') {
-      setOptions([...options, { rowId: Date.now().toString(), title: '', description: '' }]);
-    } else if (type === 'interactive') {
-      setOptions([...options, { name: '', displayText: '', url: '' }]);
-    }
-  };
-
-  const handleOptionUpdate = (index: number, updatedOption: any) => {
-    const newOptions = [...options];
-    newOptions[index] = updatedOption;
-    setOptions(newOptions);
-  };
-
-  const handleOptionDelete = (index: number) => {
-    setOptions(options.filter((_, i) => i !== index));
-  };
-
-  React.useEffect(() => {
-    handleUpdate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [type, text, buttonText, options]);
-
-  return (
-    <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
-      <div className="flex justify-between items-center">
-        <h4 className="font-medium">Expected Response</h4>
-        <button onClick={onDelete} className="text-red-500 hover:text-red-700">
-          <Trash2 className="w-4 h-4" />
-        </button>
-      </div>
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1"> Response Type </label>
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value as 'text' | 'button' | 'list' | 'interactive')}
-            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          >
-            <option value="text">Text</option>
-            <option value="button">Button</option>
-            <option value="list">List</option>
-            <option value="interactive">Interactive</option>
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1"> Message Text </label>
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            rows={3}
-            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 resize-none"
-            placeholder="Enter message text"
-          />
-        </div>
-        {type === 'list' && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1"> Button Text </label>
-            <input
-              type="text"
-              value={buttonText}
-              onChange={(e) => setButtonText(e.target.value)}
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              placeholder="Enter button text"
-            />
-          </div>
-        )}
-        {(type === 'button' || type === 'list' || type === 'interactive') && (
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <label className="block text-sm font-medium text-gray-700">
-                {type === 'button' ? 'Buttons' : type === 'list' ? 'List Options' : 'Interactive Options'}
-              </label>
-              <button onClick={handleOptionAdd} className="text-blue-500 hover:text-blue-700">
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {options.map((option, index) => (
-                <div key={index} className="flex space-x-2 items-start">
-                  {type === 'button' ? (
-                    <input
-                      type="text"
-                      value={option.text}
-                      onChange={(e) =>
-                        handleOptionUpdate(index, {
-                          ...option,
-                          text: e.target.value,
-                        })
-                      }
-                      className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      placeholder="Button text"
-                    />
-                  ) : type === 'list' ? (
-                    <div className="flex-1 space-y-2">
-                      <input
-                        type="text"
-                        value={option.title}
-                        onChange={(e) =>
-                          handleOptionUpdate(index, {
-                            ...option,
-                            title: e.target.value,
-                          })
-                        }
-                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        placeholder="Title"
-                      />
-                      <textarea
-                        value={option.description}
-                        onChange={(e) =>
-                          handleOptionUpdate(index, {
-                            ...option,
-                            description: e.target.value,
-                          })
-                        }
-                        rows={2}
-                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 resize-none"
-                        placeholder="Description"
-                      />
-                    </div>
-                  ) : (
-                    <div className="flex-1 space-y-2">
-                      <input
-                        type="text"
-                        value={option.name}
-                        onChange={(e) =>
-                          handleOptionUpdate(index, {
-                            ...option,
-                            name: e.target.value,
-                          })
-                        }
-                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        placeholder="Name"
-                      />
-                      <input
-                        type="text"
-                        value={option.displayText}
-                        onChange={(e) =>
-                          handleOptionUpdate(index, {
-                            ...option,
-                            displayText: e.target.value,
-                          })
-                        }
-                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        placeholder="Display Text"
-                      />
-                      <input
-                        type="url"
-                        value={option.url}
-                        onChange={(e) =>
-                          handleOptionUpdate(index, {
-                            ...option,
-                            url: e.target.value,
-                          })
-                        }
-                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        placeholder="URL"
-                      />
-                    </div>
-                  )}
-                  <button onClick={() => handleOptionDelete(index)} className="mt-1 text-red-500 hover:text-red-700">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
 
 export const TestEditor: React.FC<TestEditorProps> = ({ testCase, onSave, onCancel }) => {
   const [name, setName] = React.useState(testCase?.name || '');
@@ -290,7 +80,7 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testCase, onSave, onCanc
       </div>
       <div className="space-y-6 max-h-[calc(100vh-12rem)] overflow-y-auto">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1"> Test Case Name </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Test Case Name</label>
           <input
             type="text"
             value={name}
@@ -322,7 +112,7 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testCase, onSave, onCanc
                 </button>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1"> User Message </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">User Message</label>
                 <textarea
                   value={interaction.userMessage}
                   onChange={(e) =>
