@@ -12,7 +12,7 @@ export const PhoneSelector: React.FC = () => {
   const setSelectedPhoneNumber = useStore((state) => state.setSelectedPhoneNumber);
 
   React.useEffect(() => {
-    if (!selectedPhoneNumber && FIXED_PHONE_NUMBERS.length > 0) {
+    if (selectedPhoneNumber == null && FIXED_PHONE_NUMBERS.length > 0) {
       setSelectedPhoneNumber(FIXED_PHONE_NUMBERS[0].number);
     }
   }, [selectedPhoneNumber, setSelectedPhoneNumber]);
