@@ -67,14 +67,17 @@ export const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpda
     <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
       <div className="flex justify-between items-center">
         <h4 className="font-medium">Expected Response</h4>
-        <button onClick={onDelete} className="text-red-500 hover:text-red-700">
+        <button onClick={onDelete} className="text-red-500 hover:text-red-700" title="Delete response">
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Response Type</label>
+          <label htmlFor="response-type" className="block text-sm font-medium text-gray-700 mb-1">
+            Response Type
+          </label>
           <select
+            id="response-type"
             value={type}
             onChange={(e) => setType(e.target.value as 'text' | 'button' | 'list' | 'interactive')}
             className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -86,8 +89,11 @@ export const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpda
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Message Text</label>
+          <label htmlFor="message-text" className="block text-sm font-medium text-gray-700 mb-1">
+            Message Text
+          </label>
           <textarea
+            id="message-text"
             value={text}
             onChange={(e) => setText(e.target.value)}
             rows={3}
@@ -97,8 +103,11 @@ export const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpda
         </div>
         {type === 'list' && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Button Text</label>
+            <label htmlFor="button-text" className="block text-sm font-medium text-gray-700 mb-1">
+              Button Text
+            </label>
             <input
+              id="button-text"
               type="text"
               value={buttonText}
               onChange={(e) => setButtonText(e.target.value)}
@@ -108,12 +117,12 @@ export const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpda
           </div>
         )}
         {(type === 'button' || type === 'list' || type === 'interactive') && (
-          <div className="space-y-2">
+          <fieldset className="space-y-2">
             <div className="flex justify-between items-center">
-              <label className="block text-sm font-medium text-gray-700">
+              <legend className="block text-sm font-medium text-gray-700">
                 {type === 'button' ? 'Buttons' : type === 'list' ? 'List Options' : 'Interactive Options'}
-              </label>
-              <button onClick={handleOptionAdd} className="text-blue-500 hover:text-blue-700">
+              </legend>
+              <button onClick={handleOptionAdd} className="text-blue-500 hover:text-blue-700" title="Add option">
                 <Plus className="w-4 h-4" />
               </button>
             </div>
@@ -121,21 +130,31 @@ export const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpda
               {options.map((option, index) => (
                 <div key={index} className="flex space-x-2 items-start">
                   {type === 'button' ? (
-                    <input
-                      type="text"
-                      value={option.text}
-                      onChange={(e) =>
-                        handleOptionUpdate(index, {
-                          ...option,
-                          text: e.target.value,
-                        })
-                      }
-                      className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      placeholder="Button text"
-                    />
+                    <>
+                      <label htmlFor={`button-text-${index}`} className="sr-only">
+                        Button Text
+                      </label>
+                      <input
+                        id={`button-text-${index}`}
+                        type="text"
+                        value={option.text}
+                        onChange={(e) =>
+                          handleOptionUpdate(index, {
+                            ...option,
+                            text: e.target.value,
+                          })
+                        }
+                        className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        placeholder="Button text"
+                      />
+                    </>
                   ) : type === 'list' ? (
                     <div className="flex-1 space-y-2">
+                      <label htmlFor={`list-title-${index}`} className="sr-only">
+                        Title
+                      </label>
                       <input
+                        id={`list-title-${index}`}
                         type="text"
                         value={option.title}
                         onChange={(e) =>
@@ -147,7 +166,11 @@ export const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpda
                         className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                         placeholder="Title"
                       />
+                      <label htmlFor={`list-description-${index}`} className="sr-only">
+                        Description
+                      </label>
                       <textarea
+                        id={`list-description-${index}`}
                         value={option.description}
                         onChange={(e) =>
                           handleOptionUpdate(index, {
@@ -162,7 +185,11 @@ export const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpda
                     </div>
                   ) : (
                     <div className="flex-1 space-y-2">
+                      <label htmlFor={`interactive-name-${index}`} className="sr-only">
+                        Name
+                      </label>
                       <input
+                        id={`interactive-name-${index}`}
                         type="text"
                         value={option.name}
                         onChange={(e) =>
@@ -174,7 +201,11 @@ export const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpda
                         className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                         placeholder="Name"
                       />
+                      <label htmlFor={`interactive-displayText-${index}`} className="sr-only">
+                        Display Text
+                      </label>
                       <input
+                        id={`interactive-displayText-${index}`}
                         type="text"
                         value={option.displayText}
                         onChange={(e) =>
@@ -186,7 +217,11 @@ export const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpda
                         className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                         placeholder="Display Text"
                       />
+                      <label htmlFor={`interactive-url-${index}`} className="sr-only">
+                        URL
+                      </label>
                       <input
+                        id={`interactive-url-${index}`}
                         type="url"
                         value={option.url}
                         onChange={(e) =>
@@ -200,13 +235,13 @@ export const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpda
                       />
                     </div>
                   )}
-                  <button onClick={() => handleOptionDelete(index)} className="mt-1 text-red-500 hover:text-red-700">
+                  <button onClick={() => handleOptionDelete(index)} className="mt-1 text-red-500 hover:text-red-700" title="Delete option">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               ))}
             </div>
-          </div>
+          </fieldset>
         )}
       </div>
     </div>
