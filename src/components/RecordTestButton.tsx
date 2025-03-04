@@ -8,11 +8,11 @@ export const RecordTestButton: React.FC = () => {
 
   const handleToggleRecording = () => {
     if (recordingTestCase) {
-      // Encerra a gravação: salva o test case e limpa o estado de gravação
+      // End recording: save the test case and clear recording state
       addTestCase(recordingTestCase);
       setRecordingTestCase(null);
     } else {
-      // Inicia a gravação: cria um novo test case vazio
+      // Start recording: create a new empty test case
       const newTestCase: TestCase = {
         id: Date.now().toString(),
         name: `Novo Teste (Gravando)`,
@@ -25,9 +25,9 @@ export const RecordTestButton: React.FC = () => {
   return (
     <button onClick={handleToggleRecording} title={recordingTestCase ? 'Encerrar teste e salvar' : 'Gravar novo teste'}>
       {recordingTestCase ? (
-        <StopCircle className="w-5 h-5 text-red-600 hover:text-red-800" />
+        <StopCircle data-testid="stop-icon" className="w-5 h-5 text-red-600 hover:text-red-800" />
       ) : (
-        <Mic className="w-5 h-5 text-green-600 hover:text-green-800" />
+        <Mic data-testid="mic-icon" className="w-5 h-5 text-green-600 hover:text-green-800" />
       )}
     </button>
   );
