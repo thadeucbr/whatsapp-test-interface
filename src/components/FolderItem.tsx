@@ -58,8 +58,10 @@ export const FolderItem: React.FC<FolderItemProps> = ({
     onTestMove(testId, folder.id);
   };
 
+  const marginLeftClass = `ml-${level * 4}`;
+
   return (
-    <div className={`ml-${level * 4} mt-2`}>
+    <div className={`${marginLeftClass} mt-2`}>
       <div
         className={`flex items-center justify-between p-3 rounded-lg border ${
           currentTestId === folder.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
