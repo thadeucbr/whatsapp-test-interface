@@ -1,9 +1,8 @@
 import '@testing-library/jest-dom';
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PhoneSelector } from './PhoneSelector';
-import { vi } from 'vitest';
+import { vi, Mock } from 'vitest';
 import * as store from '../store';
 
 vi.mock('../store', () => ({
@@ -17,7 +16,8 @@ describe('PhoneSelector Component', () => {
 
   it('renders header and select element with formatted option', () => {
     const mockSetSelectedPhoneNumber = vi.fn();
-    (store.useStore as any).mockImplementation((selector: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (store.useStore as unknown as Mock).mockImplementation((selector: any) => {
       const state = {
         selectedPhoneNumber: '551126509993@c.us',
         setSelectedPhoneNumber: mockSetSelectedPhoneNumber,
@@ -52,7 +52,8 @@ describe('PhoneSelector Component', () => {
 
   it('sets default phone number when none is selected', async () => {
     const mockSetSelectedPhoneNumber = vi.fn();
-    (store.useStore as any).mockImplementation((selector: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (store.useStore as unknown as Mock).mockImplementation((selector: any) => {
       const state = {
         selectedPhoneNumber: null,
         setSelectedPhoneNumber: mockSetSelectedPhoneNumber,
@@ -86,7 +87,8 @@ describe('PhoneSelector Component', () => {
 
   it('calls setSelectedPhoneNumber on select change', async () => {
     const mockSetSelectedPhoneNumber = vi.fn();
-    (store.useStore as any).mockImplementation((selector: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (store.useStore as unknown as Mock).mockImplementation((selector: any) => {
       const state = {
         selectedPhoneNumber: '551126509993@c.us',
         setSelectedPhoneNumber: mockSetSelectedPhoneNumber,
