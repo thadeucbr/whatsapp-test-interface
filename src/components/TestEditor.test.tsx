@@ -1,4 +1,4 @@
-import React, { act } from 'react';
+import { act } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { TestEditor } from './TestEditor';
@@ -27,7 +27,7 @@ describe('TestEditor', () => {
     const nameInput = screen.getByDisplayValue('Test Case 1') as HTMLInputElement;
     expect(nameInput.value).to.equal('Test Case 1');
     // Verifica se o título indica que é edição
-    expect(screen.getByText('Edit Test Case')).to.exist;
+    expect(screen.getByText('Edit Test Case')).toBeInTheDocument();
     // Verifica se a interação está renderizada com o userMessage 'Hello'
     const interactionInput = screen.getByDisplayValue('Hello') as HTMLTextAreaElement;
     expect(interactionInput.value).to.equal('Hello');
@@ -43,7 +43,7 @@ describe('TestEditor', () => {
     const nameInput = screen.getByPlaceholderText('Enter test case name') as HTMLInputElement;
     expect(nameInput.value).to.equal('');
     // Título deve indicar "New Test Case"
-    expect(screen.getByText('New Test Case')).to.exist;
+    expect(screen.getByText('New Test Case')).toBeInTheDocument();
   });
 
   it('calls onCancel when the cancel button is clicked', async () => {
@@ -56,7 +56,7 @@ describe('TestEditor', () => {
     // Como esse botão não possui texto, buscamos pelo primeiro botão que não contenha "Save".
     const buttons = screen.getAllByRole('button');
     const cancelButton = buttons.find((btn) => !btn.textContent?.includes('Save'));
-    expect(cancelButton).to.exist;
+    expect(cancelButton).toBeInTheDocument();
     await act(async () => {
       fireEvent.click(cancelButton!);
     });
@@ -92,7 +92,7 @@ describe('TestEditor', () => {
     await act(async () => {
       fireEvent.change(interactionInput, { target: { value: 'Hi there' } });
     });
-    expect(screen.getByDisplayValue('Hi there')).to.exist;
+    expect(screen.getByDisplayValue('Hi there')).toBeInTheDocument();
   });
 
   it('deletes an interaction when the delete button is clicked', async () => {
@@ -128,7 +128,7 @@ describe('TestEditor', () => {
     });
     // O novo response é renderizado via ResponseEditor; verificamos se o textarea com placeholder "Enter message text" aparece.
     const responseTextArea = await screen.findByPlaceholderText('Enter message text');
-    expect(responseTextArea).to.exist;
+    expect(responseTextArea).toBeInTheDocument();
   });
 
   it('calls onSave with updated test case when Save is clicked', async () => {
