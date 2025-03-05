@@ -1,36 +1,43 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { vi, describe, it, expect, beforeEach, Mock } from 'vitest';
 import { TestRunner } from './TestRunner';
-import { useStore } from '../store';
 import { sendMessage } from '../socket';
-import { Message } from '../types';
+import { Message, TestCase } from '../types';
 
 // Define a mutable mockStore
 let mockStore: {
-  testCases: any[];
+  testCases: TestCase[];
   currentTestId: string;
   connected: boolean;
   messages: Message[];
-  recordingTestCase: any;
+  recordingTestCase: boolean | null;
   selectedPhoneNumber: string; // Added selectedPhoneNumber
-  addMessage: vi.Mock;
-  setTestCases: vi.Mock;
-  setCurrentTestId: vi.Mock;
-  setConnected: vi.Mock;
-  setMessages: vi.Mock;
-  setRecordingTestCase: vi.Mock;
+  addMessage: Mock;
+  setTestCases: Mock;
+  setCurrentTestId: Mock;
+  setConnected: Mock;
+  setMessages: Mock;
+  setRecordingTestCase: Mock;
 };
 
 // Initialize default test case
-const defaultTestCase = {
+const defaultTestCase: TestCase = {
   id: 'test1',
   name: 'Sample Test',
   interactions: [
     {
       userMessage: 'Hello',
       expectedResponses: [
-        { type: 'text', body: { text: 'Hi there!' } },
+        {
+          type: 'text',
+          body: {
+            text: 'Hi there!',
+            buttonText: null,
+            options: null,
+          },
+          from: 'bot',
+          timestamp: Date.now(),
+        },
       ],
     },
   ],
@@ -47,7 +54,7 @@ vi.mock('../socket', () => ({
 }));
 
 describe('TestRunner Component', () => {
-  const mockSendMessage = sendMessage as unknown as vi.Mock;
+  const mockSendMessage = sendMessage as unknown as Mock;
 
   beforeEach(() => {
     // Reset mocks before each test
@@ -94,14 +101,20 @@ describe('TestRunner Component', () => {
     });
 
     render(<TestRunner />);
-    const runButton = screen.getByRole('button', { name: /run test/i }) as HTMLButtonElement;
+    const runButton = screen.getByRole('button', {
+      name: /run test/i,
+    }) as HTMLButtonElement;
     expect(runButton).toBeDisabled();
   });
 
   it('handles sending a message', () => {
     const { container } = render(<TestRunner />);
-    const textarea = screen.getByPlaceholderText('Type a message...') as HTMLTextAreaElement;
-    const sendButton = container.querySelector('button[type="submit"]') as HTMLButtonElement;
+    const textarea = screen.getByPlaceholderText(
+      'Type a message...'
+    ) as HTMLTextAreaElement;
+    const sendButton = container.querySelector(
+      'button[type="submit"]'
+    ) as HTMLButtonElement;
     expect(sendButton).toBeInTheDocument();
 
     fireEvent.change(textarea, { target: { value: 'Test message' } });
@@ -114,7 +127,9 @@ describe('TestRunner Component', () => {
 
   it('prevents sending empty messages', () => {
     const { container } = render(<TestRunner />);
-    const sendButton = container.querySelector('button[type="submit"]') as HTMLButtonElement;
+    const sendButton = container.querySelector(
+      'button[type="submit"]'
+    ) as HTMLButtonElement;
     expect(sendButton).toBeDisabled();
   });
 
@@ -124,7 +139,9 @@ describe('TestRunner Component', () => {
 
     fireEvent.click(runButton);
     expect(mockSendMessage).toHaveBeenCalledWith('Hello');
-    expect(screen.getByText(/Running interaction 1 of 1, response 1 of 1\.\.\./i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Running interaction 1 of 1, response 1 of 1\.\.\./i)
+    ).toBeInTheDocument();
   });
 
   it('displays test results after receiving messages', async () => {
@@ -164,14 +181,15 @@ describe('TestRunner Component', () => {
       interactions: [
         {
           userMessage: 'Hello',
-          expectedResponses: [
-            { type: 'text', body: { text: 'Hi there!' } },
-          ],
+          expectedResponses: [{ type: 'text', body: { text: 'Hi there!' } }],
         },
         {
           userMessage: 'Choose an option',
           expectedResponses: [
-            { type: 'button', body: { text: 'Choose an option', buttonText: 'Option 1' } },
+            {
+              type: 'button',
+              body: { text: 'Choose an option', buttonText: 'Option 1' },
+            },
           ],
         },
       ],
@@ -205,9 +223,6 @@ describe('TestRunner Component', () => {
     });
 
     rerender(<TestRunner />);
-
-
-
 
     // Simulate second response
     const secondMessage: Message = {
