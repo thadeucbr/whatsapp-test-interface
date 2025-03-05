@@ -1,8 +1,8 @@
-import React, { act } from 'react';
+import { act } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import { TestManager } from './TestManager';
-import { TestCase } from '../types';
+import { Folder, TestCase } from '../types';
 import { useStore } from '../store';
 
 // Faz o mock do hook useStore para controlarmos o estado da store
@@ -12,15 +12,15 @@ vi.mock('../store', () => ({
 
 let mockStore: {
   testCases: TestCase[];
-  folders: any[];
+  folders: Folder[];
   currentTestId: string | null;
-  addTestCase: (...args: any[]) => void;
-  deleteTestCase: (...args: any[]) => void;
-  setCurrentTestId: (...args: any[]) => void;
-  updateTestCase: (...args: any[]) => void;
-  addFolder: (...args: any[]) => void;
-  updateFolder: (...args: any[]) => void;
-  deleteFolder: (...args: any[]) => void;
+  addTestCase: (...args: TestCase[]) => void;
+  deleteTestCase: (...args: string[]) => void;
+  setCurrentTestId: (...args: string[]) => void;
+  updateTestCase: (...args: TestCase[]) => void;
+  addFolder: (...args: Folder[]) => void;
+  updateFolder: (...args: Folder[]) => void;
+  deleteFolder: (...args: string[]) => void;
 };
 
 beforeEach(() => {
@@ -36,19 +36,19 @@ beforeEach(() => {
     updateFolder: vi.fn(),
     deleteFolder: vi.fn(),
   };
-  (useStore as any).mockReturnValue(mockStore);
+  (useStore as unknown as Mock).mockReturnValue(mockStore);
 });
 
 describe('TestManager', () => {
   it('renders header and action buttons', () => {
     render(<TestManager />);
     // Verifica se o cabeçalho "Test Cases" é exibido
-    expect(screen.getByText('Test Cases')).to.exist;
+    expect(screen.getByText('Test Cases')).toBeInTheDocument();
     // Verifica se o botão "Add Folder" (pelo title) está presente
-    expect(screen.getByTitle('Add Folder')).to.exist;
+    expect(screen.getByTitle('Add Folder')).toBeInTheDocument();
     // Verifica se o input do tipo file está presente (mesmo que escondido)
     const fileInput = document.querySelector('input[type="file"]');
-    expect(fileInput).to.exist;
+    expect(fileInput).toBeInTheDocument();
   });
 
   it('calls export logic when export button is clicked', () => {
@@ -83,7 +83,7 @@ describe('TestManager', () => {
     const headerIcons = screen
       .getByText('Test Cases')
       .parentElement?.querySelector('div.flex.space-x-2');
-    expect(headerIcons).to.exist;
+    expect(headerIcons).toBeTruthy();
     const iconButtons = headerIcons ? Array.from(headerIcons.querySelectorAll('button')) : [];
     // O último botão é o de adicionar teste
     const addTestBtn = iconButtons[iconButtons.length - 1];
@@ -92,7 +92,7 @@ describe('TestManager', () => {
     });
     expect(mockStore.addTestCase).toHaveBeenCalled();
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Enter test case name')).to.exist;
+      expect(screen.getByPlaceholderText('Enter test case name')).toBeInTheDocument();
     });
   });
 
@@ -110,7 +110,7 @@ describe('TestManager', () => {
       fireEvent.click(editButton);
     });
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Enter test case name')).to.exist;
+      expect(screen.getByPlaceholderText('Enter test case name')).toBeInTheDocument();
     });
   });
 
