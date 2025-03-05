@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { IncomingMessageDTO } from '../types';
@@ -48,7 +49,7 @@ export const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpda
     }
   };
 
-  const handleOptionUpdate = (index: number, updatedOption: any) => {
+  const handleOptionUpdate = (index: number, updatedOption: { id?: string; text?: string; rowId?: string; title?: string; description?: string; name?: string; displayText?: string; url?: string }) => {
     const newOptions = [...options];
     newOptions[index] = updatedOption;
     setOptions(newOptions);
