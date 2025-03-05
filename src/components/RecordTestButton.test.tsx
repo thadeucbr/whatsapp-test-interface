@@ -1,9 +1,8 @@
 import '@testing-library/jest-dom';
-import React from 'react';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { RecordTestButton } from './RecordTestButton';
-import { vi } from 'vitest';
+import { vi, Mock } from 'vitest';
 import * as store from '../store';
 import { TestCase } from '../types';
 
@@ -20,7 +19,7 @@ describe('RecordTestButton Component', () => {
   });
 
   it('renders Mic icon when not recording', () => {
-    (store.useStore as any).mockReturnValue({
+    (store.useStore as unknown as Mock).mockReturnValue({
       recordingTestCase: null,
       setRecordingTestCase: mockSetRecordingTestCase,
       addTestCase: mockAddTestCase,
@@ -35,7 +34,7 @@ describe('RecordTestButton Component', () => {
   it('starts recording when clicked and sets a new test case', async () => {
     const mockDateNow = vi.spyOn(Date, 'now').mockReturnValue(1609459200000); // Mock date to a fixed timestamp
 
-    (store.useStore as any).mockReturnValue({
+    (store.useStore as unknown as Mock).mockReturnValue({
       recordingTestCase: null,
       setRecordingTestCase: mockSetRecordingTestCase,
       addTestCase: mockAddTestCase,
@@ -58,7 +57,7 @@ describe('RecordTestButton Component', () => {
   });
 
   it('renders Stop icon when recording', () => {
-    (store.useStore as any).mockReturnValue({
+    (store.useStore as unknown as Mock).mockReturnValue({
       recordingTestCase: {
         id: 'test123',
         name: 'Teste Gravando',
@@ -81,7 +80,7 @@ describe('RecordTestButton Component', () => {
       interactions: [],
     };
 
-    (store.useStore as any).mockReturnValue({
+    (store.useStore as unknown as Mock).mockReturnValue({
       recordingTestCase: recordingTestCase,
       setRecordingTestCase: mockSetRecordingTestCase,
       addTestCase: mockAddTestCase,
