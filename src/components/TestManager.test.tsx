@@ -1,4 +1,3 @@
-// TestManager.test.tsx
 import React, { act } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -58,8 +57,8 @@ describe('TestManager', () => {
     render(<TestManager />);
     const buttons = screen.getAllByRole('button');
     // Considerando que a ordem dos ícones seja:
-    // [Upload, Export, Add Folder, RecordTestButton, Add Test]
-    const exportButton = buttons[1];
+    // [Download, Add Folder, RecordTestButton, Add Test]
+    const exportButton = buttons[0];
     act(() => {
       fireEvent.click(exportButton);
     });
