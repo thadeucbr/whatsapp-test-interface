@@ -1,4 +1,4 @@
-import React, { act } from 'react';
+import { act } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
@@ -6,10 +6,14 @@ import { ResponseEditor } from './ResponseEditor';
 import { IncomingMessageDTO } from '../types';
 
 const initialTextResponse: IncomingMessageDTO = {
-  id: '1',
   type: 'text',
-  body: { text: 'Texto inicial' },
+  body: {
+    text: 'Texto inicial',
+    buttonText: null,
+    options: null
+  },
   timestamp: 0,
+  from: ''
 };
 
 describe('ResponseEditor', () => {
@@ -74,10 +78,13 @@ describe('ResponseEditor', () => {
 
   it('adiciona, atualiza e deleta uma opção quando o tipo é "button"', async () => {
     const responseButton: IncomingMessageDTO = {
-      id: '2',
       type: 'button',
-      body: { text: 'Texto do botão', options: [] },
+      body: {
+        text: 'Texto do botão', options: [],
+        buttonText: null
+      },
       timestamp: 0,
+      from: ''
     };
 
     const mockOnUpdate = vi.fn();
@@ -96,7 +103,7 @@ describe('ResponseEditor', () => {
     });
 
     const optionInput = await screen.findByPlaceholderText('Button text');
-    expect(optionInput).to.exist;
+    expect(optionInput).toBeInTheDocument();
 
     await act(async () => {
       userEvent.clear(optionInput);
@@ -116,16 +123,16 @@ describe('ResponseEditor', () => {
 
     await waitFor(() => {
       const lastCall = mockOnUpdate.mock.calls[mockOnUpdate.mock.calls.length - 1][0];
-      expect(lastCall.body.options).to.be.null;
+      expect(lastCall.body.options).toBeNull();
     });
   });
 
   it('exibe input de "button text" e atualiza seu valor quando o tipo é "list"', async () => {
     const responseList: IncomingMessageDTO = {
-      id: '3',
       type: 'list',
       body: { text: 'Texto da lista', buttonText: '', options: [] },
       timestamp: 0,
+      from: ''
     };
 
     const mockOnUpdate = vi.fn();
@@ -142,7 +149,7 @@ describe('ResponseEditor', () => {
     expect(select.value).to.equal('list');
 
     const buttonTextInput = screen.getByPlaceholderText('Enter button text') as HTMLInputElement;
-    expect(buttonTextInput).to.exist;
+    expect(buttonTextInput).toBeInTheDocument();
 
     await act(async () => {
       userEvent.clear(buttonTextInput);
@@ -157,10 +164,13 @@ describe('ResponseEditor', () => {
 
   it('adiciona e atualiza uma opção interativa quando o tipo é "interactive"', async () => {
     const responseInteractive: IncomingMessageDTO = {
-      id: '4',
       type: 'interactive',
-      body: { text: 'Texto interativo', options: [] },
+      body: {
+        text: 'Texto interativo', options: [],
+        buttonText: null
+      },
       timestamp: 0,
+      from: ''
     };
 
     const mockOnUpdate = vi.fn();
