@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { TestCase, Message, PhoneNumber, Folder } from './types';
 
 interface Store {
+  recordingTestCase: null | TestCase;
   testCases: TestCase[];
   folders: Folder[];
   currentTestId: string | null;
@@ -23,7 +24,7 @@ interface Store {
   deleteFolder: (id: string) => void;
 }
 
-export const useStore = create<Store>((set, get) => ({
+export const useStore = create<Store>((set) => ({
   testCases: JSON.parse(localStorage.getItem('testCases') || '[]'),
   folders: JSON.parse(localStorage.getItem('folders') || '[]'),
   currentTestId: null,
