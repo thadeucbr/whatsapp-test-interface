@@ -2,7 +2,7 @@ import React from 'react';
 import { useStore } from '../store';
 import { sendMessage } from '../socket';
 import { Send, Play } from 'lucide-react';
-import { Message, IncomingMessageDTO } from '../types';
+import { Message } from '../types';
 import { verifySingleResponse, TestResult as TestResultType } from '../utils/testRunnerUtils';
 import { TestResultItem } from './TestResultItem';
 
