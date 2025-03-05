@@ -22,6 +22,7 @@ interface Store {
   addFolder: (folder: Folder) => void;
   updateFolder: (folder: Folder) => void;
   deleteFolder: (id: string) => void;
+  setRecordingTestCase: (testCase: TestCase | null) => void;
 }
 
 export const useStore = create<Store>((set) => ({
