@@ -23,10 +23,10 @@ export const TestResultItem: React.FC<TestResultItemProps> = ({ result }) => {
           Interaction {result.interactionIndex + 1}, Response {result.responseIndex + 1}:{' '}
           {result.success ? 'Success' : 'Failed'}
         </p>
-        {!result.success && result.details && (
+        {!result.success && (
           <div className="mt-2 space-y-3 text-sm text-red-700">
             <p className="font-medium">{result.error}</p>
-            {result.details.map((detail, i) => (
+            {result.details && result.details.map((detail, i) => (
               <div key={i} className="space-y-1 pl-4 border-l-2 border-red-200">
                 <p className="font-medium">{detail.field}:</p>
                 <div className="space-y-1">
