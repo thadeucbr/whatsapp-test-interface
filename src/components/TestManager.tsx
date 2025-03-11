@@ -130,7 +130,7 @@ export const TestManager: React.FC = () => {
 
   return (
     <div className="flex-1 bg-white rounded-lg shadow-lg overflow-hidden flex flex-col h-[calc(40vh-8rem)]">
-      <div className="p-4 bg-gray-50 border-b">
+      <div className="p-4 bg-gray-50 border-b flex flex-col h-full">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-800">Test Cases</h2>
           <div className="flex space-x-2">
@@ -149,14 +149,13 @@ export const TestManager: React.FC = () => {
             <button onClick={() => handleAddFolder()} title="Add Folder">
               <FolderPlus className="w-5 h-5 text-gray-600 hover:text-gray-800" />
             </button>
-            {/* Botão para gravar novo teste */}
             <RecordTestButton />
             <button onClick={handleAddTest}>
               <Plus className="w-5 h-5 text-gray-600 hover:text-gray-800" />
             </button>
           </div>
         </div>
-        <div className="max-h-[calc(50vh-12rem)] overflow-y-auto space-y-2">
+        <div className="flex-1 overflow-y-auto space-y-2">
           {folders
             .filter((folder) => !folder.parentId)
             .map((folder) => (
