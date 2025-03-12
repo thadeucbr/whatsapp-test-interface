@@ -4,7 +4,8 @@ import { Phone } from 'lucide-react';
 import type { PhoneNumber } from '../types';
 
 const FIXED_PHONE_NUMBERS: PhoneNumber[] = [
-  { id: '1126509993', number: '551126509993@c.us', name: 'Institucional PF' }
+  { id: '1126509993', number: '551126509993@c.us', name: '[Beta] Institucional PF' },
+  { id: '1126509977', number: '551126509977@c.us', name: '[Beta] PJ' },
 ];
 
 export const PhoneSelector: React.FC = () => {
@@ -12,7 +13,7 @@ export const PhoneSelector: React.FC = () => {
   const setSelectedPhoneNumber = useStore((state) => state.setSelectedPhoneNumber);
 
   React.useEffect(() => {
-    if (!selectedPhoneNumber && FIXED_PHONE_NUMBERS.length > 0) {
+    if (selectedPhoneNumber == null && FIXED_PHONE_NUMBERS.length > 0) {
       setSelectedPhoneNumber(FIXED_PHONE_NUMBERS[0].number);
     }
   }, [selectedPhoneNumber, setSelectedPhoneNumber]);

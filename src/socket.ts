@@ -17,7 +17,7 @@ socket.on('newMessage', (message) => {
   const store = useStore.getState();
   const selectedPhoneNumber = store.selectedPhoneNumber;
 
-  // Only add the message if it's from the selected phone number
+  // Adiciona a mensagem na lista (mantendo o fluxo atual)
   if (message.from === selectedPhoneNumber || message.to === selectedPhoneNumber) {
     store.addMessage({
       id: Date.now().toString(),
@@ -29,6 +29,28 @@ socket.on('newMessage', (message) => {
       buttonText: message.body.buttonText || undefined,
       phoneNumber: message.from,
     });
+
+    // Se estiver gravando, adiciona a resposta do bot à última interação registrada
+    if (store.recordingTestCase) {
+      const currentTest = store.recordingTestCase;
+      if (currentTest.interactions.length > 0) {
+        const lastInteraction = currentTest.interactions[currentTest.interactions.length - 1];
+        const newExpectedResponse = {
+          from: message.from,
+          body: {
+            text: message.body.text,
+            buttonText: message.body.buttonText || null,
+            options: message.body.options || null,
+          },
+          timestamp: message.timestamp,
+          type: message.type,
+        };
+        lastInteraction.expectedResponses.push(newExpectedResponse);
+        store.setRecordingTestCase({
+          ...currentTest,
+        });
+      }
+    }
   }
 });
 
@@ -45,11 +67,16 @@ export const sendMessage = (message: string) => {
     return;
   }
 
-  const payload = {
-    to: selectedPhoneNumber,
-    message,
-  };
+  // Se estiver gravando um teste, registra a mensagem do usuário como nova interação
+  if (store.recordingTestCase) {
+    const newInteraction = { userMessage: message, expectedResponses: [] };
+    store.setRecordingTestCase({
+      ...store.recordingTestCase,
+      interactions: [...store.recordingTestCase.interactions, newInteraction],
+    });
+  }
 
+  const payload = { to: selectedPhoneNumber, message };
   socket.emit('sendMessage', payload);
   store.addMessage({
     id: Date.now().toString(),
