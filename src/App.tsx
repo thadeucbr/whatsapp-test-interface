@@ -1,11 +1,12 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-import { Bot, TestTube } from 'lucide-react';
+import { Bot, TestTube, MessageSquare } from 'lucide-react';
 import { ChatPanel } from './components/ChatPanel';
 import { TestManager } from './components/TestManager';
 import { TestRunner } from './components/TestRunner';
 import { PhoneSelector } from './components/PhoneSelector';
 import { AIAnalysis } from './pages/AIAnalysis';
+import { DualChatAITesting } from './pages/DualChatAITesting';
 import './socket';
 
 function App() {
@@ -29,6 +30,13 @@ function App() {
                 >
                   <Bot className="w-5 h-5 mr-2" />
                   AI Analysis
+                </Link>
+                <Link
+                  to="/dual-chat"
+                  className="flex items-center px-4 py-2 text-gray-700 hover:text-gray-900"
+                >
+                  <MessageSquare className="w-5 h-5 mr-2" />
+                  Dual Chat Testing
                 </Link>
               </div>
             </div>
@@ -55,6 +63,7 @@ function App() {
               }
             />
             <Route path="/ai" element={<AIAnalysis />} />
+            <Route path="/dual-chat" element={<DualChatAITesting />} />
           </Routes>
         </div>
       </div>
