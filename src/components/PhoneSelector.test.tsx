@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,9 +15,8 @@ describe('PhoneSelector Component', () => {
     vi.clearAllMocks();
   });
 
-  it('renders header and select element with formatted option', () => {
+  it('renders header and select element with formatted options', () => {
     const mockSetSelectedPhoneNumber = vi.fn();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (store.useStore as unknown as Mock).mockImplementation((selector: any) => {
       const state = {
         selectedPhoneNumber: '551126509993@c.us',
@@ -47,12 +47,12 @@ describe('PhoneSelector Component', () => {
     expect(screen.getByText('Select Phone Number')).toBeInTheDocument();
     const select = screen.getByRole('combobox');
     expect(select).toHaveValue('551126509993@c.us');
-    expect(screen.getByText('Institucional PF (1126509993)')).toBeInTheDocument();
+    expect(screen.getByText('[Beta] Institucional PF (1126509993)')).toBeInTheDocument();
+    expect(screen.getByText('[Beta] PJ (1126509977)')).toBeInTheDocument();
   });
 
   it('sets default phone number when none is selected', async () => {
     const mockSetSelectedPhoneNumber = vi.fn();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (store.useStore as unknown as Mock).mockImplementation((selector: any) => {
       const state = {
         selectedPhoneNumber: null,
@@ -87,7 +87,6 @@ describe('PhoneSelector Component', () => {
 
   it('calls setSelectedPhoneNumber on select change', async () => {
     const mockSetSelectedPhoneNumber = vi.fn();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (store.useStore as unknown as Mock).mockImplementation((selector: any) => {
       const state = {
         selectedPhoneNumber: '551126509993@c.us',
