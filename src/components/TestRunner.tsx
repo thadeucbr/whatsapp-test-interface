@@ -1,13 +1,12 @@
 import React from 'react';
 import { useStore } from '../store';
 import { sendMessage } from '../socket';
-import { Send, Play, RotateCcw, AlertTriangle } from 'lucide-react';
+import { Play, RotateCcw, AlertTriangle } from 'lucide-react';
 import { Message } from '../types';
 import { verifySingleResponse, TestResult as TestResultType } from '../utils/testRunnerUtils';
 import { TestResultItem } from './TestResultItem';
 
 export const TestRunner: React.FC = () => {
-  const [message, setMessage] = React.useState('');
   const [currentInteractionIndex, setCurrentInteractionIndex] = React.useState<number>(-1);
   const [currentResponseIndex, setCurrentResponseIndex] = React.useState<number>(-1);
   const [testResults, setTestResults] = React.useState<TestResultType[]>([]);
@@ -23,14 +22,6 @@ export const TestRunner: React.FC = () => {
       textAreaRef.current.focus();
     }
   }, [recordingTestCase]);
-
-  const handleSend = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (message.trim()) {
-      sendMessage(message.trim());
-      setMessage('');
-    }
-  };
 
   const runTest = () => {
     if (currentTest && currentTest.interactions.length > 0) {
@@ -153,29 +144,6 @@ export const TestRunner: React.FC = () => {
           <div className="flex items-center justify-between">
             <h3 className="font-medium text-gray-800">{currentTest.name}</h3>
           </div>
-          <form onSubmit={handleSend} className="flex space-x-2">
-            <textarea
-              ref={textAreaRef}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend(e);
-                }
-              }}
-              placeholder="Type a message..."
-              rows={4}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <button
-              type="submit"
-              disabled={!message.trim() || !connected}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            >
-              <Send className="w-5 h-5" />
-            </button>
-          </form>
           {currentInteractionIndex !== -1 && currentResponseIndex !== -1 && (
             <div className="p-3 bg-blue-50 border border-blue-100 rounded-lg">
               <div className="flex items-center text-sm text-blue-700">
