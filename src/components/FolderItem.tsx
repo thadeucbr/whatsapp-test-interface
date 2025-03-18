@@ -50,10 +50,16 @@ export const FolderItem: React.FC<FolderItemProps> = ({
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    e.currentTarget.classList.add('bg-blue-50', 'border-blue-300');
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.currentTarget.classList.remove('bg-blue-50', 'border-blue-300');
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
+    e.currentTarget.classList.remove('bg-blue-50', 'border-blue-300');
     const testId = e.dataTransfer.getData('text/plain');
     onTestMove(testId, folder.id);
   };
@@ -63,14 +69,17 @@ export const FolderItem: React.FC<FolderItemProps> = ({
   return (
     <div className={`${marginLeftClass} mt-2`}>
       <div
-        className={`flex items-center justify-between p-3 rounded-lg border ${
+        className={`flex items-center justify-between p-3 rounded-lg border transition-colors duration-200 ${
           currentTestId === folder.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
         }`}
         onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
         <div className="flex items-center space-x-2 flex-1">
-          <FolderIcon className="w-5 h-5 text-yellow-500" />
+          <button onClick={() => setIsOpen(!isOpen)} className="text-yellow-500 hover:text-yellow-600">
+            <FolderIcon className="w-5 h-5" />
+          </button>
           {isEditing ? (
             <input
               type="text"
@@ -79,14 +88,16 @@ export const FolderItem: React.FC<FolderItemProps> = ({
               onBlur={handleRename}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleRename();
+                if (e.key === 'Escape') {
+                  setName(folder.name);
+                  setIsEditing(false);
+                }
               }}
-              className="flex-1 bg-transparent border-b-2 border-blue-500 focus:outline-none"
+              className="flex-1 bg-transparent border-b-2 border-blue-500 focus:outline-none px-1"
               autoFocus
             />
           ) : (
-            <button onClick={() => setIsOpen(!isOpen)} className="flex-1 text-left">
-              {folder.name}
-            </button>
+            <span className="flex-1">{folder.name}</span>
           )}
         </div>
         <div className="flex space-x-2">
@@ -108,11 +119,17 @@ export const FolderItem: React.FC<FolderItemProps> = ({
             .map(tc => (
               <div
                 key={tc.id}
-                className={`flex items-center justify-between p-3 rounded-lg border ${
+                className={`flex items-center justify-between p-3 rounded-lg border transition-colors duration-200 ${
                   currentTestId === tc.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
                 }`}
                 draggable
-                onDragStart={(e) => e.dataTransfer.setData('text/plain', tc.id)}
+                onDragStart={(e) => {
+                  e.dataTransfer.setData('text/plain', tc.id);
+                  e.currentTarget.classList.add('opacity-50');
+                }}
+                onDragEnd={(e) => {
+                  e.currentTarget.classList.remove('opacity-50');
+                }}
               >
                 <button className="flex-1 text-left" onClick={() => onTestSelect(tc.id)}>
                   {tc.name}
