@@ -1,6 +1,17 @@
 import React from 'react';
 import { useStore } from '../store';
-import { Plus, FolderPlus, Search, Mic, Copy, Edit2, Trash2 } from 'lucide-react';
+import { 
+  Plus, 
+  FolderPlus, 
+  Search, 
+  Mic, 
+  Copy, 
+  Edit2, 
+  Trash2, 
+  Cloud, 
+  Download, 
+  Computer 
+} from 'lucide-react';
 import { TestPreviewPanel } from '../components/TestPreviewPanel';
 import { FolderItem } from '../components/FolderItem';
 import { ChatPanel } from '../components/ChatPanel';
@@ -10,6 +21,7 @@ import { RecordTestButton } from '../components/RecordTestButton';
 export const TestManagement: React.FC = () => {
   const {
     testCases,
+    cloudTests,
     folders,
     addTestCase,
     updateTestCase,
@@ -18,11 +30,19 @@ export const TestManagement: React.FC = () => {
     updateFolder,
     deleteFolder,
     recordingTestCase,
+    fetchAndSetCloudTests,
+    downloadCloudTest,
+    setRecordingTestCase
   } = useStore();
 
   const [searchTerm, setSearchTerm] = React.useState('');
   const [selectedTest, setSelectedTest] = React.useState<TestCase | null>(null);
   const [isCreating, setIsCreating] = React.useState(false);
+  const [isCloudTest, setIsCloudTest] = React.useState(false);
+
+  React.useEffect(() => {
+    fetchAndSetCloudTests();
+  }, [fetchAndSetCloudTests]);
 
   const handleCreateTest = () => {
     const newTest: TestCase = {
@@ -32,16 +52,25 @@ export const TestManagement: React.FC = () => {
     };
     setSelectedTest(newTest);
     setIsCreating(true);
+    setIsCloudTest(false);
   };
 
-  const handleSaveTest = (test: TestCase) => {
+  const handleSaveTest = async (test: TestCase) => {
     if (isCreating) {
-      addTestCase(test);
+      await addTestCase(test, true);
     } else {
-      updateTestCase(test);
+      await updateTestCase(test, isCloudTest);
     }
     setSelectedTest(null);
     setIsCreating(false);
+    setIsCloudTest(false);
+  };
+
+  const handleSaveRecordingTest = async () => {
+    if (recordingTestCase) {
+      await addTestCase(recordingTestCase, true);
+      setRecordingTestCase(null);
+    }
   };
 
   const handleAddFolder = (parentId: string | null = null) => {
@@ -69,11 +98,21 @@ export const TestManagement: React.FC = () => {
     addTestCase(newTest);
   };
 
-  const filteredTests = React.useMemo(() => {
-    return testCases.filter(test => 
-      test.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const handleDownloadCloudTest = async (test: TestCase) => {
+    await downloadCloudTest(test);
+  };
+
+  const filteredLocalTests = React.useMemo(() => {
+    return testCases.filter(test =>
+      test && test.name && test.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [testCases, searchTerm]);
+
+  const filteredCloudTests = React.useMemo(() => {
+    return cloudTests.filter(test =>
+      test && test.name && test.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [cloudTests, searchTerm]);
 
   return (
     <div className="space-y-6">
@@ -113,76 +152,154 @@ export const TestManagement: React.FC = () => {
             </div>
           </div>
 
-          <div className="space-y-2 max-h-[calc(100vh-16rem)] overflow-y-auto">
-            {folders
-              .filter((folder) => !folder.parentId)
-              .map((folder) => (
-                <FolderItem
-                  key={folder.id}
-                  folder={folder}
-                  testCases={filteredTests}
-                  folders={folders}
-                  onRename={(id, name) => updateFolder({ ...folders.find(f => f.id === id)!, name })}
-                  onDelete={deleteFolder}
-                  onAddSubfolder={handleAddFolder}
-                  onTestMove={handleTestMove}
-                  onTestSelect={(id) => setSelectedTest(testCases.find(t => t.id === id) || null)}
-                  onTestEdit={(test) => setSelectedTest(test)}
-                  onTestDuplicate={handleDuplicateTest}
-                  onTestDelete={deleteTestCase}
-                  currentTestId={selectedTest?.id || null}
-                />
-              ))}
-            {filteredTests
-              .filter((tc) => !tc.folderId)
-              .map((test) => (
-                <div
-                  key={test.id}
-                  className={`flex items-center justify-between p-3 rounded-lg border transition-colors duration-200 ${
-                    selectedTest?.id === test.id
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                  draggable
-                  onDragStart={(e) => {
-                    e.dataTransfer.setData('text/plain', test.id);
-                    e.currentTarget.classList.add('opacity-50');
-                  }}
-                  onDragEnd={(e) => {
-                    e.currentTarget.classList.remove('opacity-50');
-                  }}
-                >
-                  <button 
-                    className="flex-1 text-left" 
-                    onClick={() => setSelectedTest(test)}
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-2 flex items-center">
+                <Cloud className="w-4 h-4 mr-2" />
+                Cloud Tests
+              </h3>
+              <div className="space-y-2">
+                {filteredCloudTests.map((test) => (
+                  <div
+                    key={test.id}
+                    className={`flex items-center justify-between p-3 rounded-lg border transition-colors duration-200 ${
+                      selectedTest?.id === test.id && isCloudTest
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
                   >
-                    {test.name}
-                  </button>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => handleDuplicateTest(test)}
-                      className="text-gray-400 hover:text-blue-500"
-                      title="Duplicate test case"
+                    <button 
+                      className="flex-1 text-left" 
+                      onClick={() => {
+                        setSelectedTest(test);
+                        setIsCloudTest(true);
+                      }}
                     >
-                      <Copy className="w-4 h-4" />
+                      {test.name}
                     </button>
-                    <button
-                      onClick={() => setSelectedTest(test)}
-                      className="text-gray-400 hover:text-blue-500"
-                      title="Edit test case"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => deleteTestCase(test.id)}
-                      className="text-gray-400 hover:text-red-500"
-                      title="Delete test case"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleDownloadCloudTest(test)}
+                        className="text-gray-400 hover:text-blue-500"
+                        title="Download test"
+                      >
+                        <Download className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedTest(test);
+                          setIsCloudTest(true);
+                        }}
+                        className="text-gray-400 hover:text-blue-500"
+                        title="Edit test case"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => deleteTestCase(test.id, true)}
+                        className="text-gray-400 hover:text-red-500"
+                        title="Delete test case"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-2 flex items-center">
+                <Computer className="w-4 h-4 mr-2" />
+                Local Tests
+              </h3>
+              <div className="space-y-2">
+                {folders
+                  .filter((folder) => !folder.parentId)
+                  .map((folder) => (
+                    <FolderItem
+                      key={folder.id}
+                      folder={folder}
+                      testCases={filteredLocalTests}
+                      folders={folders}
+                      onRename={(id, name) => updateFolder({ ...folders.find(f => f.id === id)!, name })}
+                      onDelete={deleteFolder}
+                      onAddSubfolder={handleAddFolder}
+                      onTestMove={handleTestMove}
+                      onTestSelect={(id) => {
+                        const test = testCases.find(t => t.id === id);
+                        if (test) {
+                          setSelectedTest(test);
+                          setIsCloudTest(false);
+                        }
+                      }}
+                      onTestEdit={(test) => {
+                        setSelectedTest(test);
+                        setIsCloudTest(false);
+                      }}
+                      onTestDuplicate={handleDuplicateTest}
+                      onTestDelete={(id) => deleteTestCase(id, false)}
+                      currentTestId={selectedTest?.id || null}
+                    />
+                  ))}
+                {filteredLocalTests
+                  .filter((tc) => !tc.folderId)
+                  .map((test) => (
+                    <div
+                      key={test.id}
+                      className={`flex items-center justify-between p-3 rounded-lg border transition-colors duration-200 ${
+                        selectedTest?.id === test.id && !isCloudTest
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      draggable
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData('text/plain', test.id);
+                        e.currentTarget.classList.add('opacity-50');
+                      }}
+                      onDragEnd={(e) => {
+                        e.currentTarget.classList.remove('opacity-50');
+                      }}
+                    >
+                      <button 
+                        className="flex-1 text-left" 
+                        onClick={() => {
+                          setSelectedTest(test);
+                          setIsCloudTest(false);
+                        }}
+                      >
+                        {test.name}
+                      </button>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleDuplicateTest(test)}
+                          className="text-gray-400 hover:text-blue-500"
+                          title="Duplicate test case"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedTest(test);
+                            setIsCloudTest(false);
+                          }}
+                          className="text-gray-400 hover:text-blue-500"
+                          title="Edit test case"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => deleteTestCase(test.id, false)}
+                          className="text-gray-400 hover:text-red-500"
+                          title="Delete test case"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -194,6 +311,7 @@ export const TestManagement: React.FC = () => {
               onCancel={() => {
                 setSelectedTest(null);
                 setIsCreating(false);
+                setIsCloudTest(false);
               }}
             />
           ) : recordingTestCase ? (
@@ -206,6 +324,14 @@ export const TestManagement: React.FC = () => {
                 </div>
               </div>
               <ChatPanel />
+              <div className="mt-4">
+                <button
+                  onClick={handleSaveRecordingTest}
+                  className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                >
+                  Conclude &amp; Save Test
+                </button>
+              </div>
             </div>
           ) : (
             <div className="flex items-center justify-center h-96 bg-white rounded-lg shadow-lg">

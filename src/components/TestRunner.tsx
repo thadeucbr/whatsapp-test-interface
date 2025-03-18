@@ -11,17 +11,10 @@ export const TestRunner: React.FC = () => {
   const [currentResponseIndex, setCurrentResponseIndex] = React.useState<number>(-1);
   const [testResults, setTestResults] = React.useState<TestResultType[]>([]);
   const [isBusy, setIsBusy] = React.useState(false);
-  const { testCases, currentTestId, connected, messages, recordingTestCase } = useStore();
+  const { testCases, currentTestId, connected, messages } = useStore();
   const selectedPhoneNumber = useStore((state) => state.selectedPhoneNumber);
-  const currentTest = recordingTestCase || testCases.find((tc) => tc.id === currentTestId);
+  const currentTest = testCases.find((tc) => tc.id === currentTestId);
   const lastMessageRef = React.useRef<Message | null>(null);
-  const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
-
-  React.useEffect(() => {
-    if (recordingTestCase && textAreaRef.current) {
-      textAreaRef.current.focus();
-    }
-  }, [recordingTestCase]);
 
   const runTest = () => {
     if (currentTest && currentTest.interactions.length > 0) {
