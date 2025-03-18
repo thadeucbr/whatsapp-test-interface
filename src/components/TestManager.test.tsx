@@ -42,30 +42,25 @@ beforeEach(() => {
 describe('TestManager', () => {
   it('renders header and action buttons', () => {
     render(<TestManager />);
-    // Verifica se o cabeçalho "Test Cases" é exibido
     expect(screen.getByText('Test Cases')).toBeInTheDocument();
-    // Verifica se o botão "Add Folder" (pelo title) está presente
     expect(screen.getByTitle('Add Folder')).toBeInTheDocument();
-    // Verifica se o input do tipo file está presente (mesmo que escondido)
     const fileInput = document.querySelector('input[type="file"]');
     expect(fileInput).toBeInTheDocument();
   });
 
   it('calls export logic when export button is clicked', () => {
-    // Espia as chamadas de document.createElement
     const createElementSpy = vi.spyOn(document, 'createElement');
+    const anchorClickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
     render(<TestManager />);
     const buttons = screen.getAllByRole('button');
-    // Considerando que a ordem dos ícones seja:
-    // [Download, Add Folder, RecordTestButton, Add Test]
     const exportButton = buttons[0];
     act(() => {
       fireEvent.click(exportButton);
     });
-    // Verifica se houve pelo menos uma chamada para criar um elemento "a"
     const aCalls = createElementSpy.mock.calls.filter((call) => call[0] === 'a');
     expect(aCalls.length).toBeGreaterThan(0);
     createElementSpy.mockRestore();
+    anchorClickSpy.mockRestore();
   });
 
   it('calls addFolder when "Add Folder" button is clicked', () => {
@@ -79,13 +74,11 @@ describe('TestManager', () => {
 
   it('adds a new test and opens TestEditor when "Add Test" button is clicked', async () => {
     render(<TestManager />);
-    // Localiza o grupo de ícones na header
     const headerIcons = screen
       .getByText('Test Cases')
       .parentElement?.querySelector('div.flex.space-x-2');
     expect(headerIcons).toBeTruthy();
     const iconButtons = headerIcons ? Array.from(headerIcons.querySelectorAll('button')) : [];
-    // O último botão é o de adicionar teste
     const addTestBtn = iconButtons[iconButtons.length - 1];
     await act(async () => {
       fireEvent.click(addTestBtn);
