@@ -1,6 +1,6 @@
 import React from 'react';
 import { useStore } from '../store';
-import { Plus, FolderPlus, Search, Mic } from 'lucide-react';
+import { Plus, FolderPlus, Search, Mic, Copy, Edit2, Trash2 } from 'lucide-react';
 import { TestPreviewPanel } from '../components/TestPreviewPanel';
 import { FolderItem } from '../components/FolderItem';
 import { ChatPanel } from '../components/ChatPanel';
@@ -51,6 +51,22 @@ export const TestManagement: React.FC = () => {
       parentId: parentId || null,
     };
     addFolder(newFolder);
+  };
+
+  const handleTestMove = (testId: string, folderId?: string) => {
+    const test = testCases.find(t => t.id === testId);
+    if (test) {
+      updateTestCase({ ...test, folderId });
+    }
+  };
+
+  const handleDuplicateTest = (test: TestCase) => {
+    const newTest = {
+      ...test,
+      id: Date.now().toString(),
+      name: `${test.name} (Copy)`,
+    };
+    addTestCase(newTest);
   };
 
   const filteredTests = React.useMemo(() => {
@@ -109,22 +125,10 @@ export const TestManagement: React.FC = () => {
                   onRename={(id, name) => updateFolder({ ...folders.find(f => f.id === id)!, name })}
                   onDelete={deleteFolder}
                   onAddSubfolder={handleAddFolder}
-                  onTestMove={(testId, folderId) => {
-                    const test = testCases.find(t => t.id === testId);
-                    if (test) {
-                      updateTestCase({ ...test, folderId });
-                    }
-                  }}
+                  onTestMove={handleTestMove}
                   onTestSelect={(id) => setSelectedTest(testCases.find(t => t.id === id) || null)}
                   onTestEdit={(test) => setSelectedTest(test)}
-                  onTestDuplicate={(test) => {
-                    const newTest = {
-                      ...test,
-                      id: Date.now().toString(),
-                      name: `${test.name} (Copy)`,
-                    };
-                    addTestCase(newTest);
-                  }}
+                  onTestDuplicate={handleDuplicateTest}
                   onTestDelete={deleteTestCase}
                   currentTestId={selectedTest?.id || null}
                 />
@@ -134,14 +138,49 @@ export const TestManagement: React.FC = () => {
               .map((test) => (
                 <div
                   key={test.id}
-                  className={`flex items-center justify-between p-3 rounded-lg border ${
+                  className={`flex items-center justify-between p-3 rounded-lg border transition-colors duration-200 ${
                     selectedTest?.id === test.id
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
-                  onClick={() => setSelectedTest(test)}
+                  draggable
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData('text/plain', test.id);
+                    e.currentTarget.classList.add('opacity-50');
+                  }}
+                  onDragEnd={(e) => {
+                    e.currentTarget.classList.remove('opacity-50');
+                  }}
                 >
-                  <span className="font-medium">{test.name}</span>
+                  <button 
+                    className="flex-1 text-left" 
+                    onClick={() => setSelectedTest(test)}
+                  >
+                    {test.name}
+                  </button>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => handleDuplicateTest(test)}
+                      className="text-gray-400 hover:text-blue-500"
+                      title="Duplicate test case"
+                    >
+                      <Copy className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setSelectedTest(test)}
+                      className="text-gray-400 hover:text-blue-500"
+                      title="Edit test case"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => deleteTestCase(test.id)}
+                      className="text-gray-400 hover:text-red-500"
+                      title="Delete test case"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               ))}
           </div>
