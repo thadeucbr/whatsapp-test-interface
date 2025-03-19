@@ -1,6 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
-import React from 'react';
 import { TestManagement } from './TestManagement';
 import { useStore } from '../store';
 
