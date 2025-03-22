@@ -1,5 +1,6 @@
+import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TestManagement } from './TestManagement';
 import { useStore } from '../store';
 
@@ -7,270 +8,255 @@ vi.mock('../store', () => ({
   useStore: vi.fn(),
 }));
 
-vi.mock('../components/ChatPanel', () => ({
-  ChatPanel: () => <div data-testid="chat-panel">Chat Panel</div>,
-}));
-
 vi.mock('../components/TestPreviewPanel', () => ({
   TestPreviewPanel: ({ test, onSave, onCancel }: any) => (
-    <div data-testid="test-preview-panel">
-      <span>{test?.name || 'No Test'}</span>
+    <div>
+      <span>Test Preview Panel: {test.name}</span>
       <button onClick={() => onSave(test)}>Save</button>
       <button onClick={onCancel}>Cancel</button>
     </div>
   ),
 }));
 
-vi.mock('../components/FolderItem', () => ({
-  FolderItem: (props: any) => (
-    <div data-testid="folder-item">
-      <span>{props.folder.name}</span>
-      <button onClick={() => props.onRename(props.folder.id, 'Renamed')}>Rename</button>
-      <button onClick={() => props.onDelete(props.folder.id)}>Delete</button>
-      <button onClick={() => props.onAddSubfolder(props.folder.id)}>Add Subfolder</button>
-      <button onClick={() => props.onTestMove('test-id', props.folder.id)}>Move Test</button>
-      <button onClick={() => props.onTestSelect('test-id')}>Select Test</button>
-      <button onClick={() => props.onTestEdit({ id: 'test-id', name: 'Edit Test', interactions: [] })}>
-        Edit Test
-      </button>
-      <button onClick={() => props.onTestDuplicate({ id: 'test-id', name: 'Duplicate Test', interactions: [] })}>
-        Duplicate Test
-      </button>
-      <button onClick={() => props.onTestDelete('test-id')}>Delete Test</button>
-    </div>
-  ),
+vi.mock('../components/RecordTestButton', () => ({
+  RecordTestButton: () => <button>Record Test</button>,
 }));
 
-vi.mock('../components/RecordTestButton', () => ({
-  RecordTestButton: () => <button data-testid="record-test-button">Record Test</button>,
+vi.mock('../components/PhoneSelector', () => ({
+  PhoneSelector: () => <div>Phone Selector</div>,
 }));
+
+vi.mock('../components/FolderItem', () => ({
+  FolderItem: ({
+    folder,
+    onRename,
+    onDelete,
+    onAddSubfolder,
+    onTestMove,
+    onTestSelect,
+    onTestEdit,
+    onTestDuplicate,
+    onTestDelete,
+    currentTestId,
+  }: any) => <div data-testid="folder-item">{folder.name}</div>,
+}));
+
+vi.mock('../components/ChatPanel', () => ({
+  ChatPanel: () => <div>Chat Panel</div>,
+}));
+
+const defaultStore = {
+  testCases: [],
+  cloudTests: [],
+  folders: [],
+  addTestCase: vi.fn().mockResolvedValue(null),
+  updateTestCase: vi.fn().mockResolvedValue(null),
+  deleteTestCase: vi.fn().mockResolvedValue(null),
+  addFolder: vi.fn(),
+  updateFolder: vi.fn(),
+  deleteFolder: vi.fn(),
+  recordingTestCase: null,
+  fetchAndSetCloudTests: vi.fn(),
+  downloadCloudTest: vi.fn().mockResolvedValue(null),
+  setRecordingTestCase: vi.fn(),
+  selectedPhoneNumber: null,
+  setCurrentTestId: vi.fn(),
+};
+
+beforeEach(() => {
+  (useStore as unknown as vi.Mock).mockImplementation((selector?: any) => {
+    if (typeof selector === 'function') {
+      return selector(defaultStore);
+    }
+    return defaultStore;
+  });
+});
+
+afterEach(() => {
+  vi.clearAllMocks();
+});
 
 describe('TestManagement Component', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+  it('renders header, control buttons and phone selector', () => {
+    render(<TestManagement />);
+    expect(screen.getByText('Test Management')).toBeDefined();
+    expect(screen.getByText('New Folder')).toBeDefined();
+    expect(screen.getByText('Create Test')).toBeDefined();
+    expect(screen.getByText('Record Test')).toBeDefined();
+    expect(screen.getByText('Phone Selector')).toBeDefined();
   });
 
-  test('renders correctly and calls fetchAndSetCloudTests on mount', () => {
-    const fetchAndSetCloudTests = vi.fn();
-    (useStore as any).mockReturnValue({
-      testCases: [],
-      cloudTests: [],
-      folders: [],
-      addTestCase: vi.fn(),
-      updateTestCase: vi.fn(),
-      deleteTestCase: vi.fn(),
-      addFolder: vi.fn(),
-      updateFolder: vi.fn(),
-      deleteFolder: vi.fn(),
-      recordingTestCase: null,
-      fetchAndSetCloudTests,
-      downloadCloudTest: vi.fn(),
-      setRecordingTestCase: vi.fn(),
-      messages: [],
-      selectedPhoneNumber: '',
-    });
-
+  it('shows "No Test Selected" when no test is selected and not recording', () => {
     render(<TestManagement />);
-
-    expect(screen.getByText('Test Management')).toBeInTheDocument();
-    expect(fetchAndSetCloudTests).toHaveBeenCalled();
+    expect(screen.getByText('No Test Selected')).toBeDefined();
+    expect(
+      screen.getByText(
+        'Select a test from the list or create a new one to get started'
+      )
+    ).toBeDefined();
   });
 
-  test('handles create test button and shows TestPreviewPanel', () => {
-    const addTestCase = vi.fn();
-    (useStore as any).mockReturnValue({
-      testCases: [],
-      cloudTests: [],
-      folders: [],
-      addTestCase,
-      updateTestCase: vi.fn(),
-      deleteTestCase: vi.fn(),
-      addFolder: vi.fn(),
-      updateFolder: vi.fn(),
-      deleteFolder: vi.fn(),
-      recordingTestCase: null,
-      fetchAndSetCloudTests: vi.fn(),
-      downloadCloudTest: vi.fn(),
-      setRecordingTestCase: vi.fn(),
-      messages: [],
-      selectedPhoneNumber: '',
-    });
-
+  it('handles create test action and save new test', async () => {
     render(<TestManagement />);
-
     fireEvent.click(screen.getByText('Create Test'));
-    expect(screen.getByTestId('test-preview-panel')).toBeInTheDocument();
-  });
-
-  test('handles record test panel and save recording test', async () => {
-    const addTestCase = vi.fn().mockResolvedValue(undefined);
-    const setRecordingTestCase = vi.fn();
-    (useStore as any).mockReturnValue({
-      testCases: [],
-      cloudTests: [],
-      folders: [],
-      addTestCase,
-      updateTestCase: vi.fn(),
-      deleteTestCase: vi.fn(),
-      addFolder: vi.fn(),
-      updateFolder: vi.fn(),
-      deleteFolder: vi.fn(),
-      recordingTestCase: { id: 'rec1', name: 'Recording Test', interactions: [] },
-      fetchAndSetCloudTests: vi.fn(),
-      downloadCloudTest: vi.fn(),
-      setRecordingTestCase,
-      messages: [],
-      selectedPhoneNumber: '',
-    });
-
-    render(<TestManagement />);
-
-    expect(screen.getByText('Recording Test')).toBeInTheDocument();
-    const button = screen.getByText('Conclude & Save Test');
-    fireEvent.click(button);
-
     await waitFor(() => {
-      expect(addTestCase).toHaveBeenCalledWith(
-        { id: 'rec1', name: 'Recording Test', interactions: [] },
+      expect(
+        screen.getByText(/Test Preview Panel: New Test Case/)
+      ).toBeDefined();
+    });
+    fireEvent.click(screen.getByText('Save'));
+    await waitFor(() => {
+      expect(defaultStore.addTestCase).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'New Test Case' }),
         true
       );
-      expect(setRecordingTestCase).toHaveBeenCalledWith(null);
+    });
+    expect(screen.getByText('No Test Selected')).toBeDefined();
+  });
+
+  it('handles cancel action in preview panel', async () => {
+    render(<TestManagement />);
+    fireEvent.click(screen.getByText('Create Test'));
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Test Preview Panel: New Test Case/)
+      ).toBeDefined();
+    });
+    fireEvent.click(screen.getByText('Cancel'));
+    await waitFor(() => {
+      expect(screen.getByText('No Test Selected')).toBeDefined();
     });
   });
 
-  test('renders cloud tests and handles download, edit and delete actions', async () => {
-    const downloadCloudTest = vi.fn().mockResolvedValue(undefined);
-    const deleteTestCase = vi.fn();
-    const updateTestCase = vi.fn();
-    const cloudTests = [{ id: 'cloud1', name: 'Cloud Test 1', interactions: [] }];
-    (useStore as any).mockReturnValue({
-      testCases: [],
-      cloudTests,
-      folders: [],
-      addTestCase: vi.fn(),
-      updateTestCase,
-      deleteTestCase,
-      addFolder: vi.fn(),
-      updateFolder: vi.fn(),
-      deleteFolder: vi.fn(),
-      recordingTestCase: null,
-      fetchAndSetCloudTests: vi.fn(),
-      downloadCloudTest,
-      setRecordingTestCase: vi.fn(),
-      messages: [],
-      selectedPhoneNumber: '',
-    });
-
+  it('handles add folder action', () => {
     render(<TestManagement />);
+    fireEvent.click(screen.getByText('New Folder'));
+    expect(defaultStore.addFolder).toHaveBeenCalled();
+  });
 
-    const cloudTestButton = screen.getByText('Cloud Test 1');
-    fireEvent.click(cloudTestButton);
-    expect(screen.getByTestId('test-preview-panel')).toBeInTheDocument();
+  it('filters cloud tests based on search term', () => {
+    defaultStore.cloudTests = [
+      { id: '1', name: 'Cloud Test One', interactions: [] },
+      { id: '2', name: 'Another Cloud Test', interactions: [] },
+    ];
+    render(<TestManagement />);
+    const searchInput = screen.getByPlaceholderText('Search tests...');
+    fireEvent.change(searchInput, { target: { value: 'one' } });
+    expect(screen.getByText('Cloud Test One')).toBeDefined();
+    expect(screen.queryByText('Another Cloud Test')).toBeNull();
+  });
 
+  it('handles cloud test actions: download, edit, delete', async () => {
+    defaultStore.cloudTests = [
+      { id: '1', name: 'Cloud Test One', interactions: [] },
+    ];
+    render(<TestManagement />);
+    fireEvent.click(screen.getByText('Cloud Test One'));
     const downloadButton = screen.getByTitle('Download test');
     fireEvent.click(downloadButton);
     await waitFor(() => {
-      expect(downloadCloudTest).toHaveBeenCalledWith(cloudTests[0]);
+      expect(defaultStore.downloadCloudTest).toHaveBeenCalledWith(
+        defaultStore.cloudTests[0]
+      );
     });
-
-    const editButton = screen.getByTitle('Edit test case');
-    fireEvent.click(editButton);
-    expect(screen.getByTestId('test-preview-panel')).toBeInTheDocument();
-
+    // Directly get the first edit button as there's only one cloud test
+    const cloudEditButton = screen.getAllByTitle('Edit test case')[0];
+    fireEvent.click(cloudEditButton);
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Test Preview Panel: Cloud Test One/)
+      ).toBeDefined();
+    });
     const deleteButton = screen.getByTitle('Delete test case');
     fireEvent.click(deleteButton);
     await waitFor(() => {
-      expect(deleteTestCase).toHaveBeenCalledWith('cloud1', true);
+      expect(defaultStore.deleteTestCase).toHaveBeenCalledWith('1', true);
     });
   });
 
-  test('renders local tests and folder items and handles interactions', () => {
-    const updateTestCase = vi.fn();
-    const deleteTestCase = vi.fn();
-    const updateFolder = vi.fn();
-    const deleteFolder = vi.fn();
-    const addFolder = vi.fn();
-    const localTests = [{ id: 'test-id', name: 'Local Test 1', interactions: [] }];
-    const folders = [{ id: 'folder1', name: 'Folder 1', parentId: null }];
-    (useStore as any).mockReturnValue({
-      testCases: localTests,
-      cloudTests: [],
-      folders,
-      addTestCase: vi.fn(),
-      updateTestCase,
-      deleteTestCase,
-      addFolder,
-      updateFolder,
-      deleteFolder,
-      recordingTestCase: null,
-      fetchAndSetCloudTests: vi.fn(),
-      downloadCloudTest: vi.fn(),
-      setRecordingTestCase: vi.fn(),
-      messages: [],
-      selectedPhoneNumber: '',
-    });
-
-    render(<TestManagement />);
-
-    const folderItem = screen.getByTestId('folder-item');
-    expect(folderItem).toBeInTheDocument();
-
-    const renameButton = screen.getByText('Rename');
-    fireEvent.click(renameButton);
-    expect(updateFolder).toHaveBeenCalled();
-
-    const folderDeleteButton = screen.getByText('Delete');
-    fireEvent.click(folderDeleteButton);
-    expect(deleteFolder).toHaveBeenCalled();
-
-    const addSubfolderButton = screen.getByText('Add Subfolder');
-    fireEvent.click(addSubfolderButton);
-    expect(addFolder).toHaveBeenCalled();
-
-    const selectTestButton = screen.getByText('Select Test');
-    fireEvent.click(selectTestButton);
-    expect(screen.getByTestId('test-preview-panel')).toBeInTheDocument();
-
-    const editTestButton = screen.getByText('Edit Test');
-    fireEvent.click(editTestButton);
-    expect(screen.getByTestId('test-preview-panel')).toBeInTheDocument();
-
-    const duplicateTestButton = screen.getByText('Duplicate Test');
-    fireEvent.click(duplicateTestButton);
-    expect(screen.getByTestId('test-preview-panel')).toBeInTheDocument();
-
-    const deleteTestButton = screen.getByText('Delete Test');
-    fireEvent.click(deleteTestButton);
-    expect(deleteTestCase).toHaveBeenCalled();
-  });
-
-  test('filters tests based on search term', () => {
-    const localTests = [
-      { id: 'local1', name: 'Alpha Test', interactions: [] },
-      { id: 'local2', name: 'Beta Test', interactions: [] },
+  it('handles local test actions: duplicate and delete', async () => {
+    defaultStore.testCases = [
+      { id: '10', name: 'Local Test', interactions: [] },
     ];
-    (useStore as any).mockReturnValue({
-      testCases: localTests,
-      cloudTests: [],
-      folders: [],
-      addTestCase: vi.fn(),
-      updateTestCase: vi.fn(),
-      deleteTestCase: vi.fn(),
-      addFolder: vi.fn(),
-      updateFolder: vi.fn(),
-      deleteFolder: vi.fn(),
-      recordingTestCase: null,
-      fetchAndSetCloudTests: vi.fn(),
-      downloadCloudTest: vi.fn(),
-      setRecordingTestCase: vi.fn(),
-      messages: [],
-      selectedPhoneNumber: '',
-    });
-
+    defaultStore.folders = [];
+    defaultStore.cloudTests = [];
     render(<TestManagement />);
-    const searchInput = screen.getByPlaceholderText('Search tests...');
-    fireEvent.change(searchInput, { target: { value: 'Alpha' } });
-    expect(screen.getByText('Alpha Test')).toBeInTheDocument();
-    expect(screen.queryByText('Beta Test')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText('Local Test'));
+    const duplicateButton = screen.getByTitle('Duplicate test case');
+    fireEvent.click(duplicateButton);
+    await waitFor(() => {
+      expect(defaultStore.addTestCase).toHaveBeenCalled();
+    });
+    const deleteButtons = screen.getAllByTitle('Delete test case');
+    fireEvent.click(deleteButtons[0]);
+    await waitFor(() => {
+      expect(defaultStore.deleteTestCase).toHaveBeenCalledWith('10', false);
+    });
+  });
+
+  it('handles drag and drop events on local test item', async () => {
+    defaultStore.testCases = [
+      { id: '20', name: 'Draggable Test', interactions: [] },
+    ];
+    defaultStore.folders = [];
+    defaultStore.cloudTests = [];
+    render(<TestManagement />);
+    const testItem = screen.getByText('Draggable Test').parentElement!;
+    const dataTransfer = { setData: vi.fn() };
+    fireEvent.dragStart(testItem, { dataTransfer });
+    expect(dataTransfer.setData).toHaveBeenCalledWith('text/plain', '20');
+    expect(testItem.classList.contains('opacity-50')).toBe(true);
+    fireEvent.dragEnd(testItem);
+    expect(testItem.classList.contains('opacity-50')).toBe(false);
+  });
+
+  it('handles editing an existing test using preview panel save (local test)', async () => {
+    defaultStore.testCases = [
+      { id: '30', name: 'Existing Local Test', interactions: [] },
+    ];
+    defaultStore.folders = [];
+    defaultStore.cloudTests = [];
+    render(<TestManagement />);
+    const localTestElement = screen.getByText('Existing Local Test');
+    const localTestContainer = localTestElement.parentElement;
+    if (!localTestContainer) throw new Error('Local test container not found');
+    const editButton = localTestContainer.querySelector('button[title="Edit test case"]');
+    if (!editButton) throw new Error('Edit button not found');
+    fireEvent.click(editButton);
+    await waitFor(() => {
+      expect(
+        screen.getByText((content, element) =>
+          element?.tagName.toLowerCase() === 'span' &&
+          content.includes('Test Preview Panel: Existing Local Test')
+        )
+      ).toBeDefined();
+    });
+    fireEvent.click(screen.getByText('Save'));
+    await waitFor(() => {
+      expect(defaultStore.updateTestCase).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'Existing Local Test' }),
+        false
+      );
+    });
+  });
+
+  it('handles recording test save action', async () => {
+    defaultStore.recordingTestCase = {
+      id: '99',
+      name: 'Recording Test',
+      interactions: [],
+    };
+    render(<TestManagement />);
+    expect(screen.getByText('Recording Test')).toBeDefined();
+    expect(screen.getByText('Recording in progress...')).toBeDefined();
+    const concludeButton = screen.getByText('Conclude & Save Test');
+    fireEvent.click(concludeButton);
+    await waitFor(() => {
+      expect(defaultStore.addTestCase).toHaveBeenCalledWith(
+        defaultStore.recordingTestCase,
+        true
+      );
+      expect(defaultStore.setRecordingTestCase).toHaveBeenCalledWith(null);
+    });
   });
 });

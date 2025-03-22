@@ -17,6 +17,7 @@ import { FolderItem } from '../components/FolderItem';
 import { ChatPanel } from '../components/ChatPanel';
 import { TestCase, Folder } from '../types';
 import { RecordTestButton } from '../components/RecordTestButton';
+import { PhoneSelector } from '../components/PhoneSelector';
 
 export const TestManagement: React.FC = () => {
   const {
@@ -35,6 +36,7 @@ export const TestManagement: React.FC = () => {
     setRecordingTestCase
   } = useStore();
 
+  const selectedPhoneNumber = useStore((state) => state.selectedPhoneNumber);
   const [searchTerm, setSearchTerm] = React.useState('');
   const [selectedTest, setSelectedTest] = React.useState<TestCase | null>(null);
   const [isCreating, setIsCreating] = React.useState(false);
@@ -102,17 +104,30 @@ export const TestManagement: React.FC = () => {
     await downloadCloudTest(test);
   };
 
+  const filterByPhone = (test: TestCase) => {
+    if (!selectedPhoneNumber) return true;
+    return test.interactions?.some(interaction =>
+      interaction.expectedResponses?.some(resp => resp.from === selectedPhoneNumber)
+    );
+  };
+
   const filteredLocalTests = React.useMemo(() => {
     return testCases.filter(test =>
-      test && test.name && test.name.toLowerCase().includes(searchTerm.toLowerCase())
+      test &&
+      test.name &&
+      test.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      filterByPhone(test)
     );
-  }, [testCases, searchTerm]);
+  }, [testCases, searchTerm, selectedPhoneNumber]);
 
   const filteredCloudTests = React.useMemo(() => {
     return cloudTests.filter(test =>
-      test && test.name && test.name.toLowerCase().includes(searchTerm.toLowerCase())
+      test &&
+      test.name &&
+      test.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      filterByPhone(test)
     );
-  }, [cloudTests, searchTerm]);
+  }, [cloudTests, searchTerm, selectedPhoneNumber]);
 
   return (
     <div className="space-y-6">
@@ -136,6 +151,8 @@ export const TestManagement: React.FC = () => {
           </button>
         </div>
       </div>
+
+      <PhoneSelector />
 
       <div className="grid grid-cols-12 gap-8">
         <div className="col-span-4 bg-white rounded-lg shadow-lg p-4">

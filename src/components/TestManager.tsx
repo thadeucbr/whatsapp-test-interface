@@ -9,15 +9,21 @@ export const TestManager: React.FC = () => {
     currentTestId,
     deleteTestCase,
     setCurrentTestId,
+    selectedPhoneNumber
   } = useStore();
 
   const [searchTerm, setSearchTerm] = React.useState('');
 
   const filteredTests = React.useMemo(() => {
-    return testCases.filter(test => 
-      test.name.toLowerCase().includes(searchTerm.toLowerCase())
+    return testCases.filter(test =>
+      test.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      (selectedPhoneNumber
+        ? test.interactions?.some(interaction =>
+            interaction.expectedResponses?.some(resp => resp.from === selectedPhoneNumber)
+          )
+        : true)
     );
-  }, [testCases, searchTerm]);
+  }, [testCases, searchTerm, selectedPhoneNumber]);
 
   return (
     <div className="flex-1 bg-white rounded-lg shadow-lg overflow-hidden flex flex-col h-[calc(40vh-8rem)]">
