@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useStore } from '../store';
 import { sendMessage } from '../socket';
 import { Message as MessageType } from '../types';
@@ -77,9 +77,16 @@ export const ChatPanel: React.FC = () => {
   const chatEndRef = React.useRef<HTMLDivElement>(null);
   const [message, setMessage] = React.useState('');
 
-  React.useEffect(() => {
+  useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    const chatPanelElement = document.querySelector('.chat-panel');
+    if (chatPanelElement) {
+      chatPanelElement.classList.add('mounted');
+    }
+  }, []);
 
   const filteredMessages = React.useMemo(() => {
     if (!selectedPhoneNumber) return [];
@@ -95,7 +102,7 @@ export const ChatPanel: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 bg-white rounded-lg shadow-lg overflow-hidden flex flex-col h-[calc(91vh-11rem)]">
+    <div className="flex-1 bg-white rounded-lg shadow-lg overflow-hidden flex flex-col h-[calc(91vh-11rem)] chat-panel">
       <div className="p-4 bg-gray-50 border-b">
         <h2 className="text-lg font-semibold text-gray-800">Chat Preview</h2>
         {selectedPhoneNumber && (
