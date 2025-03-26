@@ -1,7 +1,8 @@
 import React from 'react';
 import { useStore } from '../store';
 import { TestCase } from '../types';
-import { Computer, Trash2 } from 'lucide-react';
+import { Computer, Trash2, Edit2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export const TestManager: React.FC = () => {
   const {
@@ -13,6 +14,7 @@ export const TestManager: React.FC = () => {
   } = useStore();
 
   const [searchTerm, setSearchTerm] = React.useState('');
+  const navigate = useNavigate();
 
   const filteredTests = React.useMemo(() => {
     return testCases.filter(test =>
@@ -24,6 +26,10 @@ export const TestManager: React.FC = () => {
         : true)
     );
   }, [testCases, searchTerm, selectedPhoneNumber]);
+
+  const handleEdit = (test: TestCase) => {
+    navigate('/test-management', { state: { selectedTest: test, isCloudTest: false } });
+  };
 
   return (
     <div className="flex-1 bg-white rounded-lg shadow-lg overflow-hidden flex flex-col h-[calc(40vh-8rem)]">
@@ -60,6 +66,13 @@ export const TestManager: React.FC = () => {
                 {testCase.name}
               </button>
               <div className="flex space-x-2">
+                <button
+                  onClick={() => handleEdit(testCase)}
+                  className="text-gray-400 hover:text-blue-500"
+                  title="Edit test case"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
                 <button
                   onClick={() => deleteTestCase(testCase.id)}
                   className="text-gray-400 hover:text-red-500"
