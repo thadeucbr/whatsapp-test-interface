@@ -9,6 +9,7 @@ import { AIAnalysis } from './pages/AIAnalysis';
 import { DualChatAITesting } from './pages/DualChatAITesting';
 import { TestManagement } from './pages/TestManagement';
 import './socket';
+import GuidedTour from './components/GuidedTour';
 
 function App() {
   return (
@@ -52,6 +53,7 @@ function App() {
         </nav>
 
         <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+          <GuidedTour />
           <Routes>
             <Route
               path="/"
