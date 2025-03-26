@@ -3,20 +3,23 @@ import { useStore } from '../store';
 import { Phone } from 'lucide-react';
 import type { PhoneNumber } from '../types';
 
-const FIXED_PHONE_NUMBERS: PhoneNumber[] = [
-  { id: '1126509993', number: '551126509993@c.us', name: '[Beta] Institucional PF' },
-  { id: '1126509977', number: '551126509977@c.us', name: '[Beta] PJ' },
-];
-
 export const PhoneSelector: React.FC = () => {
   const selectedPhoneNumber = useStore((state) => state.selectedPhoneNumber);
   const setSelectedPhoneNumber = useStore((state) => state.setSelectedPhoneNumber);
+  const phoneNumbers = useStore((state) => state.phoneNumbers);
+  const setPhoneNumbers = useStore((state) => state.setPhoneNumbers);
 
   React.useEffect(() => {
-    if (selectedPhoneNumber == null && FIXED_PHONE_NUMBERS.length > 0) {
-      setSelectedPhoneNumber(FIXED_PHONE_NUMBERS[0].number);
-    }
-  }, [selectedPhoneNumber, setSelectedPhoneNumber]);
+    const fetchPhones = async () => {
+      const response = await fetch('https://whatsappapi.barbudas.com/api/v1/phones');
+      const data: PhoneNumber[] = await response.json();
+      setPhoneNumbers(data);
+      if (!selectedPhoneNumber && data.length > 0) {
+        setSelectedPhoneNumber(data[0].number);
+      }
+    };
+    fetchPhones();
+  }, [selectedPhoneNumber, setSelectedPhoneNumber, setPhoneNumbers]);
 
   const formatPhoneDisplay = (phone: PhoneNumber) => {
     const numberWithoutSuffix = phone.number.replace('@c.us', '').replace(/^55/, '');
@@ -35,8 +38,8 @@ export const PhoneSelector: React.FC = () => {
         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       >
         <option value="">Select a phone number</option>
-        {FIXED_PHONE_NUMBERS.map((phone) => (
-          <option key={phone.id} value={phone.number}>
+        {phoneNumbers.map((phone) => (
+          <option key={phone.number} value={phone.number}>
             {formatPhoneDisplay(phone)}
           </option>
         ))}
