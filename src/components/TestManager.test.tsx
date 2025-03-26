@@ -1,5 +1,7 @@
+import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
 import { TestManager } from './TestManager';
 import { TestCase } from '../types';
 import { useStore } from '../store';
@@ -13,6 +15,7 @@ let mockStore: {
   currentTestId: string | null;
   deleteTestCase: (...args: string[]) => void;
   setCurrentTestId: (...args: string[]) => void;
+  selectedPhoneNumber?: string;
 };
 
 beforeEach(() => {
@@ -21,19 +24,28 @@ beforeEach(() => {
     currentTestId: null,
     deleteTestCase: vi.fn(),
     setCurrentTestId: vi.fn(),
+    selectedPhoneNumber: undefined,
   };
   (useStore as unknown as Mock).mockReturnValue(mockStore);
 });
 
 describe('TestManager', () => {
   it('renders header and search input', () => {
-    render(<TestManager />);
+    render(
+      <MemoryRouter>
+        <TestManager />
+      </MemoryRouter>
+    );
     expect(screen.getByText('Local Tests')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Search tests...')).toBeInTheDocument();
   });
 
   it('renders no tests message when testCases array is empty', () => {
-    render(<TestManager />);
+    render(
+      <MemoryRouter>
+        <TestManager />
+      </MemoryRouter>
+    );
     expect(screen.getByText('No local tests found')).toBeInTheDocument();
   });
 
@@ -51,7 +63,11 @@ describe('TestManager', () => {
       folderId: undefined,
     };
     mockStore.testCases = [testCase1, testCase2];
-    render(<TestManager />);
+    render(
+      <MemoryRouter>
+        <TestManager />
+      </MemoryRouter>
+    );
     expect(screen.getByText('Alpha')).toBeInTheDocument();
     expect(screen.getByText('Beta')).toBeInTheDocument();
     fireEvent.change(screen.getByPlaceholderText('Search tests...'), {
@@ -73,7 +89,11 @@ describe('TestManager', () => {
       folderId: undefined,
     };
     mockStore.testCases = [testCase];
-    render(<TestManager />);
+    render(
+      <MemoryRouter>
+        <TestManager />
+      </MemoryRouter>
+    );
     const testCaseButton = screen.getByText('Test One');
     fireEvent.click(testCaseButton);
     expect(mockStore.setCurrentTestId).toHaveBeenCalledWith('1');
@@ -87,7 +107,11 @@ describe('TestManager', () => {
       folderId: undefined,
     };
     mockStore.testCases = [testCase];
-    render(<TestManager />);
+    render(
+      <MemoryRouter>
+        <TestManager />
+      </MemoryRouter>
+    );
     const deleteButton = screen.getByTitle('Delete test case');
     fireEvent.click(deleteButton);
     expect(mockStore.deleteTestCase).toHaveBeenCalledWith('1');
