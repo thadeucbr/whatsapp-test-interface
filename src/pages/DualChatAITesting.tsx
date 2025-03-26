@@ -37,7 +37,6 @@ export const DualChatAITesting: React.FC = () => {
   }, [gptMessages]);
 
   React.useEffect(() => {
-    // Listen for AI answers from the server
     const handleAIAnswer = (message: string) => {
       setGptMessages(prev => [...prev, {
         id: Date.now().toString(),
@@ -69,7 +68,6 @@ export const DualChatAITesting: React.FC = () => {
       timestamp: Date.now()
     }]);
 
-    // Emit event to start AI testing
     socket.emit('start-ai-test', { phoneNumber: selectedPhoneNumber });
   };
 
@@ -85,13 +83,9 @@ export const DualChatAITesting: React.FC = () => {
     };
 
     setGptMessages(prev => [...prev, newMessage]);
-    
-    // Emit the user's response to the server
     socket.emit('user-ai-response', { message: userInput });
-    
     setUserInput('');
 
-    // Simulate receiving analysis after some messages
     if (gptMessages.length > 6 && !analysis) {
       setTimeout(() => {
         setAnalysis({
@@ -154,12 +148,12 @@ export const DualChatAITesting: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow-lg p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <h2 className="text-xl font-semibold text-gray-800">Dual Chat AI Testing</h2>
           <button
             onClick={handleStartTest}
             disabled={!selectedPhoneNumber || testStarted}
-            className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+            className="flex items-center justify-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
           >
             <Play className="w-4 h-4" />
             <span>Start Test</span>
@@ -170,9 +164,8 @@ export const DualChatAITesting: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-8">
-        {/* Left Chat - GPT Interaction */}
-        <div className="col-span-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-6">
           <div className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col h-[600px]">
             <div className="p-4 bg-purple-50 border-b">
               <h2 className="text-lg font-semibold text-purple-800">GPT Interaction</h2>
@@ -187,7 +180,7 @@ export const DualChatAITesting: React.FC = () => {
                   className={`flex ${message.isUser ? 'justify-end' : 'justify-start'} mb-4`}
                 >
                   <div
-                    className={`flex items-start max-w-[70%] ${
+                    className={`flex items-start max-w-[90%] sm:max-w-[70%] ${
                       message.isUser ? 'flex-row-reverse' : 'flex-row'
                     }`}
                   >
@@ -209,7 +202,7 @@ export const DualChatAITesting: React.FC = () => {
                           : 'bg-indigo-100 text-gray-800 rounded-tl-none'
                       }`}
                     >
-                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
                     </div>
                   </div>
                 </div>
@@ -238,18 +231,16 @@ export const DualChatAITesting: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Chat - WhatsApp Preview */}
-        <div className="col-span-6">
+        <div className="lg:col-span-6">
           <div className="h-[600px] flex flex-col">
             <ChatPanel />
           </div>
         </div>
       </div>
 
-      {/* GPT Review Window */}
-      <div className="grid grid-cols-12 gap-8 mt-8">
-        <div className="col-span-12">
-          <div className="bg-white rounded-lg shadow-lg p-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
+        <div className="lg:col-span-12">
+          <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
               <Brain className="w-5 h-5 mr-2" />
               GPT Analysis
@@ -257,14 +248,14 @@ export const DualChatAITesting: React.FC = () => {
             </h3>
             
             {analysis ? (
-              <div className="grid grid-cols-12 gap-8">
-                <div className="col-span-6">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="lg:col-span-6">
                   <div className="space-y-6">
                     <h4 className="font-medium text-gray-700">Ratings</h4>
                     {analysis.ratings.map((rating) => (
                       <div key={rating.category}>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="font-medium text-gray-700">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2">
+                          <span className="font-medium text-gray-700 mb-1 sm:mb-0">
                             {rating.category}
                           </span>
                           {renderStars(rating.score)}
@@ -276,7 +267,7 @@ export const DualChatAITesting: React.FC = () => {
                     ))}
                   </div>
                 </div>
-                <div className="col-span-6">
+                <div className="lg:col-span-6">
                   <div>
                     <h4 className="font-medium text-gray-700 mb-4 flex items-center">
                       <Lightbulb className="w-5 h-5 mr-2" />
