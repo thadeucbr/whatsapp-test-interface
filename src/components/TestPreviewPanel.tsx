@@ -336,6 +336,13 @@ export const TestPreviewPanel: React.FC<TestPreviewPanelProps> = ({
   const selectedPhoneNumber = useStore((state) => state.selectedPhoneNumber);
 
   React.useEffect(() => {
+    setCurrentTest(test);
+    setUserMessage('');
+    setEditingMessage(null);
+    setShowResponseEditor(false);
+  }, [test]);
+
+  React.useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [currentTest.interactions]);
 
