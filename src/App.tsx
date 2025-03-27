@@ -56,13 +56,13 @@ function App() {
                     <Bot className="w-5 h-5 mr-2" />
                     <span>AI Analysis</span>
                   </Link>
-                  <Link
+                  {/* <Link
                     to="/dual-chat"
                     className="flex items-center px-4 py-2 text-gray-700 hover:text-gray-900"
                   >
                     <MessageSquare className="w-5 h-5 mr-2" />
                     <span>Dual Chat Testing</span>
-                  </Link>
+                  </Link> */}
                   <Link
                     to="/test-management"
                     className="flex items-center px-4 py-2 text-gray-700 hover:text-gray-900"
