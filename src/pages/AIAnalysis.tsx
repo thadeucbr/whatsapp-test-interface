@@ -28,7 +28,7 @@ export const AIAnalysis: React.FC = () => {
 
   const handleStartAnalysis = async () => {
     if (conversation.length === 0) {
-      alert('No conversation found for analysis.');
+      alert('Nenhuma conversa encontrada para análise.');
       return;
     }
 
@@ -69,7 +69,7 @@ Do not return any other information besides the JSON.`,
       setAnalysis(analysisData);
     } catch (error) {
       console.error(error);
-      alert('An error occurred while analyzing the conversation.');
+      alert('Ocorreu um erro ao analisar a conversa.');
     } finally {
       setIsAnalyzing(false);
     }
@@ -97,7 +97,7 @@ Do not return any other information besides the JSON.`,
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
         <h2 className="text-xl font-semibold text-gray-800 mb-4">
-          AI Conversation Analysis
+          Análise de Conversa de IA
         </h2>
         <div className="max-w-md">
           <button
@@ -105,7 +105,7 @@ Do not return any other information besides the JSON.`,
             disabled={isAnalyzing || conversation.length === 0}
             className="w-full sm:w-auto px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
-            {isAnalyzing ? 'Analyzing...' : 'Start Analysis'}
+            {isAnalyzing ? 'Analisando...' : 'Iniciar Análise'}
           </button>
         </div>
       </div>
@@ -120,7 +120,7 @@ Do not return any other information besides the JSON.`,
               <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                   <Brain className="w-5 h-5 mr-2" />
-                  Analysis Results
+                  Resultados da Análise
                 </h3>
                 <div className="space-y-6">
                   {analysis.ratings.map((rating) => (
@@ -142,7 +142,7 @@ Do not return any other information besides the JSON.`,
               <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                   <Lightbulb className="w-5 h-5 mr-2" />
-                  Suggestions for Improvement
+                  Sugestões para Melhoria
                 </h3>
                 <ul className="space-y-3">
                   {analysis.suggestions.map((suggestion, index) => (

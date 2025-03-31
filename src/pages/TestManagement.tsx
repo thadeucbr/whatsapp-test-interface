@@ -51,7 +51,7 @@ export const TestManagement: React.FC = () => {
   const handleCreateTest = () => {
     const newTest: TestCase = {
       id: Date.now().toString(),
-      name: 'New Test Case',
+      name: 'Novo Caso de Teste',
       interactions: [],
     };
     setSelectedTest(newTest);
@@ -82,7 +82,7 @@ export const TestManagement: React.FC = () => {
   const handleAddFolder = (parentId: string | null = null) => {
     const newFolder: Folder = {
       id: Date.now().toString(),
-      name: 'New Folder',
+      name: 'Nova Pasta',
       parentId: parentId || null,
     };
     addFolder(newFolder);
@@ -99,7 +99,7 @@ export const TestManagement: React.FC = () => {
     const newTest = {
       ...test,
       id: Date.now().toString(),
-      name: `${test.name} (Copy)`,
+      name: `${test.name} (Cópia)`,
     };
     addTestCase(newTest);
   };
@@ -136,7 +136,7 @@ export const TestManagement: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">Test Management</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Gerenciamento de Testes</h1>
         <div className="flex items-center space-x-4">
           <RecordTestButton />
           <button
@@ -144,14 +144,14 @@ export const TestManagement: React.FC = () => {
             className="flex items-center space-x-2 px-4 py-2 text-gray-700 bg-white rounded-lg border border-gray-300 hover:bg-gray-50"
           >
             <FolderPlus className="w-5 h-5" />
-            <span className="hidden sm:inline">New Folder</span>
+            <span className="hidden sm:inline">Nova Pasta</span>
           </button>
           <button
             onClick={handleCreateTest}
             className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
           >
             <Plus className="w-5 h-5" />
-            <span className="hidden sm:inline">Create Test</span>
+            <span className="hidden sm:inline">Criar Teste</span>
           </button>
         </div>
       </div>
@@ -178,7 +178,7 @@ export const TestManagement: React.FC = () => {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     type="text"
-                    placeholder="Search tests..."
+                    placeholder="Pesquisar testes..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -190,7 +190,7 @@ export const TestManagement: React.FC = () => {
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-2 flex items-center">
                     <Cloud className="w-4 h-4 mr-2" />
-                    Cloud Tests
+                    Testes na Nuvem
                   </h3>
                   <div className="space-y-2">
                     {filteredCloudTests.map((test) => (
@@ -216,7 +216,7 @@ export const TestManagement: React.FC = () => {
                           <button
                             onClick={() => handleDownloadCloudTest(test)}
                             className="text-gray-400 hover:text-blue-500"
-                            title="Download test"
+                            title="Baixar teste"
                           >
                             <Download className="w-4 h-4" />
                           </button>
@@ -227,14 +227,14 @@ export const TestManagement: React.FC = () => {
                               setShowSidebar(false);
                             }}
                             className="text-gray-400 hover:text-blue-500"
-                            title="Edit test case"
+                            title="Editar caso de teste"
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => deleteTestCase(test.id, true)}
                             className="text-gray-400 hover:text-red-500"
-                            title="Delete test case"
+                            title="Excluir caso de teste"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -247,7 +247,7 @@ export const TestManagement: React.FC = () => {
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-2 flex items-center">
                     <Computer className="w-4 h-4 mr-2" />
-                    Local Tests
+                    Testes Locais
                   </h3>
                   <div className="space-y-2">
                     {folders
@@ -313,7 +313,7 @@ export const TestManagement: React.FC = () => {
                             <button
                               onClick={() => handleDuplicateTest(test)}
                               className="text-gray-400 hover:text-blue-500"
-                              title="Duplicate test case"
+                              title="Duplicar caso de teste"
                             >
                               <Copy className="w-4 h-4" />
                             </button>
@@ -324,14 +324,14 @@ export const TestManagement: React.FC = () => {
                                 setShowSidebar(false);
                               }}
                               className="text-gray-400 hover:text-blue-500"
-                              title="Edit test case"
+                              title="Editar caso de teste"
                             >
                               <Edit2 className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => deleteTestCase(test.id, false)}
                               className="text-gray-400 hover:text-red-500"
-                              title="Delete test case"
+                              title="Excluir caso de teste"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -360,10 +360,10 @@ export const TestManagement: React.FC = () => {
             ) : recordingTestCase ? (
               <div className="bg-white rounded-lg shadow-lg p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-gray-800">Recording Test</h2>
+                  <h2 className="text-lg font-semibold text-gray-800">Gravação de Teste</h2>
                   <div className="flex items-center space-x-2">
                     <Mic className="w-5 h-5 text-red-500 animate-pulse" />
-                    <span className="text-sm text-gray-600">Recording in progress...</span>
+                    <span className="text-sm text-gray-600">Gravação em andamento...</span>
                   </div>
                 </div>
                 <ChatPanel />
@@ -372,16 +372,16 @@ export const TestManagement: React.FC = () => {
                     onClick={handleSaveRecordingTest}
                     className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
                   >
-                    Conclude &amp; Save Test
+                    Concluir &amp; Salvar Teste
                   </button>
                 </div>
               </div>
             ) : (
               <div className="flex items-center justify-center h-96 bg-white rounded-lg shadow-lg">
                 <div className="text-center">
-                  <h3 className="text-lg font-medium text-gray-900">No Test Selected</h3>
+                  <h3 className="text-lg font-medium text-gray-900">Nenhum Teste Selecionado</h3>
                   <p className="mt-1 text-sm text-gray-500">
-                    Select a test from the list or create a new one to get started
+                    Selecione um teste da lista ou crie um novo para começar
                   </p>
                 </div>
               </div>

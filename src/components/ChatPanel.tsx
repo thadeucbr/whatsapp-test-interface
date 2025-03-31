@@ -97,10 +97,10 @@ export const ChatPanel: React.FC = () => {
   return (
     <div className="flex-1 bg-white rounded-lg shadow-lg overflow-hidden flex flex-col h-[calc(91vh-11rem)]">
       <div className="p-4 bg-gray-50 border-b">
-        <h2 className="text-lg font-semibold text-gray-800">Chat Preview</h2>
+        <h2 className="text-lg font-semibold text-gray-800">Pré-visualização do Chat</h2>
         {selectedPhoneNumber && (
           <p className="text-sm text-gray-600 mt-1">
-            Showing messages for: {selectedPhoneNumber}
+            Mostrando mensagens para: {selectedPhoneNumber}
           </p>
         )}
       </div>
@@ -122,7 +122,7 @@ export const ChatPanel: React.FC = () => {
                 handleSend(e);
               }
             }}
-            placeholder="Type a message..."
+            placeholder="Digite uma mensagem..."
             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           <button

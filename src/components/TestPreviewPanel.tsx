@@ -171,10 +171,10 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpdate, onD
             }
             className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="text">Text</option>
-            <option value="button">Button</option>
-            <option value="list">List</option>
-            <option value="interactive">Interactive</option>
+            <option value="text">Texto</option>
+            <option value="button">Botão</option>
+            <option value="list">Lista</option>
+            <option value="interactive">Interativo</option>
           </select>
         </div>
         <button
@@ -195,12 +195,12 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpdate, onD
         }
         className="w-full px-3 py-2 border border-gray-300 rounded-md"
         rows={2}
-        placeholder="Enter response text..."
+        placeholder="Digite o texto da mensagem..."
       />
       {response.type === 'list' && (
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Button Text
+            Texto do Botão
           </label>
           <input
             type="text"
@@ -212,7 +212,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpdate, onD
               })
             }
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter button text..."
+            placeholder="Digite o texto do botão..."
           />
         </div>
       )}
@@ -221,10 +221,10 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpdate, onD
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-gray-700">
               {response.type === 'button'
-                ? 'Buttons'
+                ? 'Botões'
                 : response.type === 'list'
-                ? 'List Options'
-                : 'Interactive Options'}
+                ? 'Opções da Lista'
+                : 'Opções Interativas'}
             </span>
             <button
               onClick={handleAddOption}
@@ -245,7 +245,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpdate, onD
                         handleUpdateOption(index, { ...option, text: e.target.value })
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                      placeholder="Button text"
+                      placeholder="Texto do botão"
                     />
                   )}
                   {response.type === 'list' && (
@@ -257,7 +257,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpdate, onD
                           handleUpdateOption(index, { ...option, title: e.target.value })
                         }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                        placeholder="Title"
+                        placeholder="Título"
                       />
                       <input
                         type="text"
@@ -269,7 +269,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpdate, onD
                           })
                         }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                        placeholder="Description"
+                        placeholder="Descrição"
                       />
                     </>
                   )}
@@ -282,7 +282,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpdate, onD
                           handleUpdateOption(index, { ...option, name: e.target.value })
                         }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                        placeholder="Name"
+                        placeholder="Nome"
                       />
                       <input
                         type="text"
@@ -291,7 +291,7 @@ const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpdate, onD
                           handleUpdateOption(index, { ...option, displayText: e.target.value })
                         }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                        placeholder="Display Text"
+                        placeholder="Texto de Exibição"
                       />
                       <input
                         type="url"
@@ -489,7 +489,7 @@ export const TestPreviewPanel: React.FC<TestPreviewPanelProps> = ({
               })
             }
             className="text-lg font-semibold bg-transparent border-b-2 border-transparent focus:border-blue-500 focus:outline-none"
-            placeholder="Enter test name..."
+            placeholder="Digite o nome do teste..."
           />
         </div>
         <div className="flex items-center space-x-2">
@@ -498,14 +498,14 @@ export const TestPreviewPanel: React.FC<TestPreviewPanelProps> = ({
             className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
           >
             <Save className="w-4 h-4" />
-            <span>Save Test</span>
+            <span>Salvar Teste</span>
           </button>
           <button
             onClick={onCancel}
             className="flex items-center space-x-2 px-4 py-2 text-gray-700 bg-white rounded-lg border border-gray-300 hover:bg-gray-50"
           >
             <X className="w-4 h-4" />
-            <span>Cancel</span>
+            <span>Cancelar</span>
           </button>
         </div>
       </div>
@@ -550,8 +550,8 @@ export const TestPreviewPanel: React.FC<TestPreviewPanelProps> = ({
             }}
             placeholder={
               editingMessage
-                ? 'Edit user message...'
-                : 'Type user message...'
+                ? 'Editar mensagem do usuário...'
+                : 'Digite a mensagem do usuário...'
             }
             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
@@ -579,7 +579,7 @@ export const TestPreviewPanel: React.FC<TestPreviewPanelProps> = ({
                 <div key={editingIndex} className="p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-medium text-gray-800">
-                      Interaction {editingIndex + 1}
+                      Interação {editingIndex + 1}
                     </h3>
                     <button
                       onClick={() => handleAddResponse(editingIndex)}
@@ -589,7 +589,7 @@ export const TestPreviewPanel: React.FC<TestPreviewPanelProps> = ({
                     </button>
                   </div>
                   <p className="text-sm text-gray-600 mb-4">
-                    User: "{interaction.userMessage}"
+                    Usuário: "{interaction.userMessage}"
                   </p>
                   <div className="space-y-4">
                     {interaction.expectedResponses.map((response, responseIndex) => (

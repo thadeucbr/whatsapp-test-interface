@@ -37,13 +37,13 @@ export const TestManager: React.FC = () => {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">
             <Computer className="w-5 h-5 text-gray-600" />
-            <h2 className="text-lg font-semibold text-gray-800">Local Tests</h2>
+            <h2 className="text-lg font-semibold text-gray-800">Testes Locais</h2>
           </div>
         </div>
         <div className="mb-4">
           <input
             type="text"
-            placeholder="Search tests..."
+            placeholder="Pesquisar testes..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -69,14 +69,14 @@ export const TestManager: React.FC = () => {
                 <button
                   onClick={() => handleEdit(testCase)}
                   className="text-gray-400 hover:text-blue-500"
-                  title="Edit test case"
+                  title="Editar caso de teste"
                 >
                   <Edit2 className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => deleteTestCase(testCase.id)}
                   className="text-gray-400 hover:text-red-500"
-                  title="Delete test case"
+                  title="Excluir caso de teste"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -85,7 +85,7 @@ export const TestManager: React.FC = () => {
           ))}
           {filteredTests.length === 0 && (
             <div className="text-center text-gray-500 py-4">
-              No local tests found
+              Nenhum teste local encontrado
             </div>
           )}
         </div>

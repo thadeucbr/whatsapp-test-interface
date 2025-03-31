@@ -101,10 +101,10 @@ export const FolderItem: React.FC<FolderItemProps> = ({
           )}
         </div>
         <div className="flex space-x-2">
-          <button onClick={() => setIsEditing(true)} className="text-gray-400 hover:text-blue-500" title="Rename folder">
+          <button onClick={() => setIsEditing(true)} className="text-gray-400 hover:text-blue-500" title="Renomear pasta">
             <Edit2 className="w-4 h-4" />
           </button>
-          <button onClick={handleAddSubfolder} className="text-gray-400 hover:text-green-500" title="Add Subfolder">
+          <button onClick={handleAddSubfolder} className="text-gray-400 hover:text-green-500" title="Adicionar Subpasta">
             <FolderPlus className="w-4 h-4" />
           </button>
           <button onClick={() => onDelete(folder.id)} className="text-gray-400 hover:text-red-500" title="Delete folder">

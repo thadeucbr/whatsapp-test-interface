@@ -20,8 +20,8 @@ export const TestResultItem: React.FC<TestResultItemProps> = ({ result }) => {
       )}
       <div className="flex-1">
         <p className={`font-medium ${result.success ? 'text-green-800' : 'text-red-800'}`}>
-          Interaction {result.interactionIndex + 1}, Response {result.responseIndex + 1}:{' '}
-          {result.success ? 'Success' : 'Failed'}
+          Interação {result.interactionIndex + 1}, Resposta {result.responseIndex + 1}:{' '}
+          {result.success ? 'Sucesso' : 'Falhou'}
         </p>
         {!result.success && (
           <div className="mt-2 space-y-3 text-sm text-red-700">
@@ -31,11 +31,11 @@ export const TestResultItem: React.FC<TestResultItemProps> = ({ result }) => {
                 <p className="font-medium">{detail.field}:</p>
                 <div className="space-y-1">
                   <div>
-                    <span className="font-medium">Expected: </span>
+                    <span className="font-medium">Esperado: </span>
                     <pre className="inline bg-red-100 px-1 rounded">{detail.expected}</pre>
                   </div>
                   <div>
-                    <span className="font-medium">Received: </span>
+                    <span className="font-medium">Recebido: </span>
                     <pre className="inline bg-red-100 px-1 rounded">{detail.received}</pre>
                   </div>
                 </div>

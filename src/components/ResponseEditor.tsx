@@ -67,7 +67,7 @@ export const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpda
   return (
     <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
       <div className="flex justify-between items-center">
-        <h4 className="font-medium">Expected Response</h4>
+        <h4 className="font-medium">Resposta Esperada</h4>
         <button onClick={onDelete} className="text-red-500 hover:text-red-700" title="Delete response">
           <Trash2 className="w-4 h-4" />
         </button>
@@ -75,7 +75,7 @@ export const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpda
       <div className="space-y-4">
         <div>
           <label htmlFor="response-type" className="block text-sm font-medium text-gray-700 mb-1">
-            Response Type
+            Tipo de Resposta
           </label>
           <select
             id="response-type"
@@ -83,15 +83,15 @@ export const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpda
             onChange={(e) => setType(e.target.value as 'text' | 'button' | 'list' | 'interactive')}
             className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           >
-            <option value="text">Text</option>
-            <option value="button">Button</option>
-            <option value="list">List</option>
-            <option value="interactive">Interactive</option>
+            <option value="text">Texto</option>
+            <option value="button">Botão</option>
+            <option value="list">Lista</option>
+            <option value="interactive">Interativo</option>
           </select>
         </div>
         <div>
           <label htmlFor="message-text" className="block text-sm font-medium text-gray-700 mb-1">
-            Message Text
+            Texto da Mensagem
           </label>
           <textarea
             id="message-text"
@@ -99,13 +99,13 @@ export const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpda
             onChange={(e) => setText(e.target.value)}
             rows={3}
             className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 resize-none"
-            placeholder="Enter message text"
+            placeholder="Digite o texto da mensagem"
           />
         </div>
         {type === 'list' && (
           <div>
             <label htmlFor="button-text" className="block text-sm font-medium text-gray-700 mb-1">
-              Button Text
+              Texto do Botão
             </label>
             <input
               id="button-text"
@@ -113,7 +113,7 @@ export const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpda
               value={buttonText}
               onChange={(e) => setButtonText(e.target.value)}
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              placeholder="Enter button text"
+              placeholder="Digite o texto do botão"
             />
           </div>
         )}
@@ -121,9 +121,9 @@ export const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpda
           <fieldset className="space-y-2">
             <div className="flex justify-between items-center">
               <legend className="block text-sm font-medium text-gray-700">
-                {type === 'button' ? 'Buttons' : type === 'list' ? 'List Options' : 'Interactive Options'}
+                {type === 'button' ? 'Botões' : type === 'list' ? 'Opções da Lista' : 'Opções Interativas'}
               </legend>
-              <button onClick={handleOptionAdd} className="text-blue-500 hover:text-blue-700" title="Add option">
+              <button onClick={handleOptionAdd} className="text-blue-500 hover:text-blue-700" title="Adicionar opção">
                 <Plus className="w-4 h-4" />
               </button>
             </div>
@@ -133,7 +133,7 @@ export const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpda
                   {type === 'button' ? (
                     <>
                       <label htmlFor={`button-text-${index}`} className="sr-only">
-                        Button Text
+                        Texto do Botão
                       </label>
                       <input
                         id={`button-text-${index}`}
@@ -146,13 +146,13 @@ export const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpda
                           })
                         }
                         className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        placeholder="Button text"
+                        placeholder="Texto do botão"
                       />
                     </>
                   ) : type === 'list' ? (
                     <div className="flex-1 space-y-2">
                       <label htmlFor={`list-title-${index}`} className="sr-only">
-                        Title
+                        Título
                       </label>
                       <input
                         id={`list-title-${index}`}
@@ -165,10 +165,10 @@ export const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpda
                           })
                         }
                         className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        placeholder="Title"
+                        placeholder="Título"
                       />
                       <label htmlFor={`list-description-${index}`} className="sr-only">
-                        Description
+                        Descrição
                       </label>
                       <textarea
                         id={`list-description-${index}`}
@@ -181,13 +181,13 @@ export const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpda
                         }
                         rows={2}
                         className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 resize-none"
-                        placeholder="Description"
+                        placeholder="Descrição"
                       />
                     </div>
                   ) : (
                     <div className="flex-1 space-y-2">
                       <label htmlFor={`interactive-name-${index}`} className="sr-only">
-                        Name
+                        Nome
                       </label>
                       <input
                         id={`interactive-name-${index}`}
@@ -200,10 +200,10 @@ export const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpda
                           })
                         }
                         className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        placeholder="Name"
+                        placeholder="Nome"
                       />
                       <label htmlFor={`interactive-displayText-${index}`} className="sr-only">
-                        Display Text
+                        Texto de Exibição
                       </label>
                       <input
                         id={`interactive-displayText-${index}`}
@@ -216,7 +216,7 @@ export const ResponseEditor: React.FC<ResponseEditorProps> = ({ response, onUpda
                           })
                         }
                         className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        placeholder="Display Text"
+                        placeholder="Texto de Exibição"
                       />
                       <label htmlFor={`interactive-url-${index}`} className="sr-only">
                         URL

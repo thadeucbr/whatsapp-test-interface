@@ -47,14 +47,14 @@ function App() {
                     className="flex items-center px-4 py-2 text-gray-700 hover:text-gray-900"
                   >
                     <TestTube className="w-5 h-5 mr-2" />
-                    <span>Test Interface</span>
+                    <span>Interface de Teste</span>
                   </Link>
                   <Link
                     to="/ai"
                     className="flex items-center px-4 py-2 text-gray-700 hover:text-gray-900"
                   >
                     <Bot className="w-5 h-5 mr-2" />
-                    <span>AI Analysis</span>
+                    <span>Análise de IA</span>
                   </Link>
                   {/* <Link
                     to="/dual-chat"
@@ -68,7 +68,7 @@ function App() {
                     className="flex items-center px-4 py-2 text-gray-700 hover:text-gray-900"
                   >
                     <Settings className="w-5 h-5 mr-2" />
-                    <span>Test Management</span>
+                    <span>Gerenciamento de Testes</span>
                   </Link>
                 </div>
               </div>
@@ -84,7 +84,7 @@ function App() {
                 className="flex items-center px-3 py-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-50"
               >
                 <TestTube className="w-5 h-5 mr-2" />
-                <span>Test Interface</span>
+                <span>Interface de Teste</span>
               </Link>
               <Link
                 to="/ai"
@@ -92,7 +92,7 @@ function App() {
                 className="flex items-center px-3 py-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-50"
               >
                 <Bot className="w-5 h-5 mr-2" />
-                <span>AI Analysis</span>
+                <span>Análise de IA</span>
               </Link>
               <Link
                 to="/dual-chat"
@@ -108,7 +108,7 @@ function App() {
                 className="flex items-center px-3 py-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-50"
               >
                 <Settings className="w-5 h-5 mr-2" />
-                <span>Test Management</span>
+                <span>Gerenciamento de Testes</span>
               </Link>
             </div>
           </div>

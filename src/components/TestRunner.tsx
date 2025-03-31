@@ -102,10 +102,10 @@ export const TestRunner: React.FC = () => {
       <div className="p-4 bg-gray-50 border-b">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
           <div className="space-y-2">
-            <h2 className="text-lg font-semibold text-gray-800">Test Runner</h2>
+            <h2 className="text-lg font-semibold text-gray-800">Executor de Testes</h2>
             <div className="flex items-center">
               <div className={`w-3 h-3 rounded-full mr-2 ${connected ? 'bg-green-500' : 'bg-red-500'}`} />
-              <span className="text-sm text-gray-600">{connected ? 'Connected' : 'Disconnected'}</span>
+              <span className="text-sm text-gray-600">{connected ? 'Conectado' : 'Desconectado'}</span>
             </div>
           </div>
           {currentTest && currentTest.interactions.length > 0 && (
@@ -114,19 +114,19 @@ export const TestRunner: React.FC = () => {
                 onClick={handleResetContext}
                 disabled={!connected || isBusy || !selectedPhoneNumber}
                 className="flex items-center justify-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
-                title="Reset conversation context"
+                title="Redefinir contexto da conversa"
               >
                 <RotateCcw className="w-4 h-4" />
-                <span className="text-sm font-medium">Reset</span>
+                <span className="text-sm font-medium">Redefinir</span>
               </button>
               <button
                 onClick={runTest}
                 disabled={!connected || isBusy || currentInteractionIndex !== -1}
                 className="flex items-center justify-center space-x-2 px-4 py-2 bg-emerald-100 text-emerald-700 rounded-lg border border-emerald-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors"
-                title="Start running the test"
+                title="Iniciar execução do teste"
               >
                 <Play className="w-4 h-4" />
-                <span className="text-sm font-medium">Run</span>
+                <span className="text-sm font-medium">Executar</span>
               </button>
             </div>
           )}
@@ -141,14 +141,14 @@ export const TestRunner: React.FC = () => {
             <div className="p-3 bg-blue-50 border border-blue-100 rounded-lg">
               <div className="flex items-center text-sm text-blue-700">
                 <AlertTriangle className="w-4 h-4 mr-2 flex-shrink-0" />
-                Running interaction {currentInteractionIndex + 1} of {currentTest.interactions.length}, response{' '}
-                {currentResponseIndex + 1} of {currentTest.interactions[currentInteractionIndex].expectedResponses.length}...
+                Executando interação {currentInteractionIndex + 1} de {currentTest.interactions.length}, resposta{' '}
+                {currentResponseIndex + 1} de {currentTest.interactions[currentInteractionIndex].expectedResponses.length}...
               </div>
             </div>
           )}
           {testResults.length > 0 && (
             <div className="space-y-2 mt-4">
-              <h4 className="font-medium text-gray-800">Test Results</h4>
+              <h4 className="font-medium text-gray-800">Resultados do Teste</h4>
               <div className="space-y-2">
                 {testResults.map((result, index) => (
                   <TestResultItem key={index} result={result} />
@@ -159,7 +159,7 @@ export const TestRunner: React.FC = () => {
         </div>
       ) : (
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-gray-500">Select a test case to begin testing</p>
+          <p className="text-gray-500">Selecione um caso de teste para começar a testar</p>
         </div>
       )}
     </div>

@@ -55,7 +55,7 @@ export const DualChatAITesting: React.FC = () => {
 
   const handleStartTest = () => {
     if (!selectedPhoneNumber) {
-      alert('Please select a phone number first');
+      alert('Por favor, selecione um número de telefone primeiro');
       return;
     }
 
@@ -63,7 +63,7 @@ export const DualChatAITesting: React.FC = () => {
     setIsAnalyzing(true);
     setGptMessages([{
       id: Date.now().toString(),
-      content: "Hello! I'm going to test this WhatsApp interface. What would you like me to help you with today?",
+      content: "Olá! Vou testar esta interface do WhatsApp. Com o que você gostaria de ajuda hoje?",
       isUser: false,
       timestamp: Date.now()
     }]);
@@ -91,35 +91,35 @@ export const DualChatAITesting: React.FC = () => {
         setAnalysis({
           ratings: [
             {
-              category: 'Ease of Use',
+              category: 'Facilidade de Uso',
               score: 4.5,
               justification:
-                'The conversation flow was intuitive and options were clearly presented. Navigation between topics was smooth.',
+                'O fluxo da conversa foi intuitivo e as opções foram claramente apresentadas. A navegação entre os tópicos foi suave.',
             },
             {
-              category: 'Persona Consistency',
+              category: 'Consistência da Persona',
               score: 4.0,
               justification:
-                'The bot maintained a consistent professional tone throughout the conversation, though there were minor variations in formality.',
+                'O bot manteve um tom profissional consistente durante toda a conversa, embora houvesse pequenas variações na formalidade.',
             },
             {
-              category: 'Writing Quality',
+              category: 'Qualidade da Escrita',
               score: 4.2,
               justification:
-                'Messages were well-structured and clear. Grammar and punctuation were consistently correct.',
+                'As mensagens foram bem estruturadas e claras. A gramática e a pontuação estavam consistentemente corretas.',
             },
             {
-              category: 'Overall',
+              category: 'Geral',
               score: 4.2,
               justification:
-                'The chatbot performs well across all metrics, providing a reliable and user-friendly experience.',
+                'O chatbot apresenta um bom desempenho em todas as métricas, proporcionando uma experiência confiável e amigável ao usuário.',
             },
           ],
           suggestions: [
-            'Consider adding more context-aware responses for complex queries',
-            'Implement follow-up questions to clarify user intent when needed',
-            'Add more personalized elements based on user history',
-            'Consider expanding the range of interactive options in responses',
+            'Considere adicionar respostas mais contextuais para consultas complexas',
+            'Implemente perguntas de acompanhamento para esclarecer a intenção do usuário quando necessário',
+            'Adicione mais elementos personalizados com base no histórico do usuário',
+            'Considere expandir a gama de opções interativas nas respostas',
           ],
         });
         setIsAnalyzing(false);
@@ -149,14 +149,14 @@ export const DualChatAITesting: React.FC = () => {
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow-lg p-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h2 className="text-xl font-semibold text-gray-800">Dual Chat AI Testing</h2>
+          <h2 className="text-xl font-semibold text-gray-800">Teste de IA de Chat Duplo</h2>
           <button
             onClick={handleStartTest}
             disabled={!selectedPhoneNumber || testStarted}
             className="flex items-center justify-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
           >
             <Play className="w-4 h-4" />
-            <span>Start Test</span>
+            <span>Iniciar Teste</span>
           </button>
         </div>
         <div className="mt-4">
@@ -168,9 +168,9 @@ export const DualChatAITesting: React.FC = () => {
         <div className="lg:col-span-6">
           <div className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col h-[600px]">
             <div className="p-4 bg-purple-50 border-b">
-              <h2 className="text-lg font-semibold text-purple-800">GPT Interaction</h2>
+              <h2 className="text-lg font-semibold text-purple-800">Interação GPT</h2>
               <p className="text-sm text-purple-600 mt-1">
-                Chat with GPT to test the WhatsApp interface
+                Converse com o GPT para testar a interface do WhatsApp
               </p>
             </div>
             <div className="flex-1 overflow-y-auto p-4 bg-purple-50">
@@ -190,7 +190,7 @@ export const DualChatAITesting: React.FC = () => {
                       }`}
                     >
                       {message.isUser ? (
-                        <span className="text-white text-sm">You</span>
+                        <span className="text-white text-sm">Você</span>
                       ) : (
                         <span className="text-white text-sm">GPT</span>
                       )}
@@ -215,7 +215,7 @@ export const DualChatAITesting: React.FC = () => {
                   type="text"
                   value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
-                  placeholder="Type your message..."
+                  placeholder="Digite sua mensagem..."
                   disabled={!testStarted}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
@@ -243,15 +243,15 @@ export const DualChatAITesting: React.FC = () => {
           <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
               <Brain className="w-5 h-5 mr-2" />
-              GPT Analysis
-              {isAnalyzing && <span className="ml-2 text-sm text-gray-500">(Analyzing...)</span>}
+              Análise GPT
+              {isAnalyzing && <span className="ml-2 text-sm text-gray-500">(Analisando...)</span>}
             </h3>
             
             {analysis ? (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <div className="lg:col-span-6">
                   <div className="space-y-6">
-                    <h4 className="font-medium text-gray-700">Ratings</h4>
+                    <h4 className="font-medium text-gray-700">Avaliações</h4>
                     {analysis.ratings.map((rating) => (
                       <div key={rating.category}>
                         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2">
@@ -271,7 +271,7 @@ export const DualChatAITesting: React.FC = () => {
                   <div>
                     <h4 className="font-medium text-gray-700 mb-4 flex items-center">
                       <Lightbulb className="w-5 h-5 mr-2" />
-                      Suggestions for Improvement
+                      Sugestões para Melhoria
                     </h4>
                     <ul className="space-y-3">
                       {analysis.suggestions.map((suggestion, index) => (
@@ -290,8 +290,8 @@ export const DualChatAITesting: React.FC = () => {
             ) : (
               <p className="text-gray-500">
                 {testStarted 
-                  ? "Analysis will appear here once the test is complete..." 
-                  : "Start a test to see the analysis"}
+                  ? "A análise aparecerá aqui assim que o teste for concluído..." 
+                  : "Inicie um teste para ver a análise"}
               </p>
             )}
           </div>
