@@ -20,7 +20,6 @@ export const AIAnalysis: React.FC = () => {
   const [analysis, setAnalysis] = React.useState<Analysis | null>(null);
   const store = useStore();
 
-  // Filtra as mensagens da conversa do número selecionado
   const conversation = React.useMemo(() => {
     return store.messages.filter(
       (msg) => msg.phoneNumber === store.selectedPhoneNumber
@@ -29,23 +28,21 @@ export const AIAnalysis: React.FC = () => {
 
   const handleStartAnalysis = async () => {
     if (conversation.length === 0) {
-      alert('Nenhuma conversa encontrada para análise.');
+      alert('No conversation found for analysis.');
       return;
     }
 
     setIsAnalyzing(true);
 
-    // Converte a conversa para o formato esperado pelo endpoint
     const formattedConversation = conversation.map((msg) => ({
       role: msg.isUser ? 'user' : 'assistant',
       content: msg.content,
     }));
 
-    // Instrução de sistema que orienta o GPT-4 a retornar a análise desejada
     const messages = [
       {
         role: 'system',
-        content: `Você deve analisar a conversa a seguir e retornar um JSON com a seguinte estrutura:
+        content: `You should analyze the following conversation and return a JSON with this structure:
 {
   "ratings": [
     { "category": "Ease of Use", "score": number(0-5), "justification": string },
@@ -56,7 +53,7 @@ export const AIAnalysis: React.FC = () => {
   "suggestions": string[]
 }
 
-Não retorne nenhuma outra informação além do JSON.`,
+Do not return any other information besides the JSON.`,
       },
       ...formattedConversation,
     ];
@@ -68,7 +65,6 @@ Não retorne nenhuma outra informação além do JSON.`,
         temperature: 0.7,
       });
       
-      // Supondo que a resposta já venha no formato JSON desejado
       const analysisData: Analysis = response.data;
       setAnalysis(analysisData);
     } catch (error) {
@@ -98,9 +94,8 @@ Não retorne nenhuma outra informação além do JSON.`,
   };
 
   return (
-    <div className="space-y-8">
-      {/* Seção de Ação para Iniciar a Análise */}
-      <div className="bg-white rounded-lg shadow-lg p-6">
+    <div className="space-y-6">
+      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
         <h2 className="text-xl font-semibold text-gray-800 mb-4">
           AI Conversation Analysis
         </h2>
@@ -108,23 +103,21 @@ Não retorne nenhuma outra informação além do JSON.`,
           <button
             onClick={handleStartAnalysis}
             disabled={isAnalyzing || conversation.length === 0}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="w-full sm:w-auto px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
             {isAnalyzing ? 'Analyzing...' : 'Start Analysis'}
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-8">
-        {/* Painel de Conversa */}
-        <div className="col-span-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-8">
           <ChatPanel />
         </div>
-        {/* Painel de Resultados da Análise */}
-        <div className="col-span-4 space-y-8">
+        <div className="lg:col-span-4 space-y-6">
           {analysis && (
             <>
-              <div className="bg-white rounded-lg shadow-lg p-6">
+              <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                   <Brain className="w-5 h-5 mr-2" />
                   Analysis Results
@@ -132,8 +125,8 @@ Não retorne nenhuma outra informação além do JSON.`,
                 <div className="space-y-6">
                   {analysis.ratings.map((rating) => (
                     <div key={rating.category}>
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-medium text-gray-700">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2">
+                        <span className="font-medium text-gray-700 mb-1 sm:mb-0">
                           {rating.category}
                         </span>
                         {renderStars(rating.score)}
@@ -146,7 +139,7 @@ Não retorne nenhuma outra informação além do JSON.`,
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow-lg p-6">
+              <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                   <Lightbulb className="w-5 h-5 mr-2" />
                   Suggestions for Improvement
