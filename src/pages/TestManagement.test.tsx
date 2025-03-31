@@ -79,58 +79,58 @@ afterEach(() => {
 describe('TestManagement Component', () => {
   it('renders header, control buttons and phone selector', () => {
     render(<TestManagement />);
-    expect(screen.getByText('Test Management')).toBeDefined();
-    expect(screen.getByText('New Folder')).toBeDefined();
-    expect(screen.getByText('Create Test')).toBeDefined();
+    expect(screen.getByText('Gerenciamento de Testes')).toBeDefined();
+    expect(screen.getByText('Nova Pasta')).toBeDefined();
+    expect(screen.getByText('Criar Teste')).toBeDefined();
     expect(screen.getByText('Record Test')).toBeDefined();
     expect(screen.getByText('Phone Selector')).toBeDefined();
   });
 
   it('shows "No Test Selected" when no test is selected and not recording', () => {
     render(<TestManagement />);
-    expect(screen.getByText('No Test Selected')).toBeDefined();
+    expect(screen.getByText('Nenhum Teste Selecionado')).toBeDefined();
     expect(
       screen.getByText(
-        'Select a test from the list or create a new one to get started'
+        'Selecione um teste da lista ou crie um novo para começar'
       )
     ).toBeDefined();
   });
 
   it('handles create test action and save new test', async () => {
     render(<TestManagement />);
-    fireEvent.click(screen.getByText('Create Test'));
+    fireEvent.click(screen.getByText('Criar Teste'));
     await waitFor(() => {
       expect(
-        screen.getByText(/Test Preview Panel: New Test Case/)
+        screen.getByText(/Test Preview Panel: Novo Caso de Teste/)
       ).toBeDefined();
     });
     fireEvent.click(screen.getByText('Save'));
     await waitFor(() => {
       expect(defaultStore.addTestCase).toHaveBeenCalledWith(
-        expect.objectContaining({ name: 'New Test Case' }),
+        expect.objectContaining({ name: 'Novo Caso de Teste' }),
         true
       );
     });
-    expect(screen.getByText('No Test Selected')).toBeDefined();
+    expect(screen.getByText('Nenhum Teste Selecionado')).toBeDefined();
   });
 
   it('handles cancel action in preview panel', async () => {
     render(<TestManagement />);
-    fireEvent.click(screen.getByText('Create Test'));
+    fireEvent.click(screen.getByText('Criar Teste'));
     await waitFor(() => {
       expect(
-        screen.getByText(/Test Preview Panel: New Test Case/)
+        screen.getByText(/Test Preview Panel: Novo Caso de Teste/)
       ).toBeDefined();
     });
     fireEvent.click(screen.getByText('Cancel'));
     await waitFor(() => {
-      expect(screen.getByText('No Test Selected')).toBeDefined();
+      expect(screen.getByText('Nenhum Teste Selecionado')).toBeDefined();
     });
   });
 
   it('handles add folder action', () => {
     render(<TestManagement />);
-    fireEvent.click(screen.getByText('New Folder'));
+    fireEvent.click(screen.getByText('Nova Pasta'));
     expect(defaultStore.addFolder).toHaveBeenCalled();
   });
 
@@ -140,7 +140,7 @@ describe('TestManagement Component', () => {
       { id: '2', name: 'Another Cloud Test', interactions: [] },
     ];
     render(<TestManagement />);
-    const searchInput = screen.getByPlaceholderText('Search tests...');
+    const searchInput = screen.getByPlaceholderText('Pesquisar testes...');
     fireEvent.change(searchInput, { target: { value: 'one' } });
     expect(screen.getByText('Cloud Test One')).toBeDefined();
     expect(screen.queryByText('Another Cloud Test')).toBeNull();
@@ -152,7 +152,7 @@ describe('TestManagement Component', () => {
     ];
     render(<TestManagement />);
     fireEvent.click(screen.getByText('Cloud Test One'));
-    const downloadButton = screen.getByTitle('Download test');
+    const downloadButton = screen.getByTitle('Baixar teste');
     fireEvent.click(downloadButton);
     await waitFor(() => {
       expect(defaultStore.downloadCloudTest).toHaveBeenCalledWith(
@@ -160,14 +160,14 @@ describe('TestManagement Component', () => {
       );
     });
     // Directly get the first edit button as there's only one cloud test
-    const cloudEditButton = screen.getAllByTitle('Edit test case')[0];
+    const cloudEditButton = screen.getAllByTitle('Editar caso de teste')[0];
     fireEvent.click(cloudEditButton);
     await waitFor(() => {
       expect(
         screen.getByText(/Test Preview Panel: Cloud Test One/)
       ).toBeDefined();
     });
-    const deleteButton = screen.getByTitle('Delete test case');
+    const deleteButton = screen.getByTitle('Excluir caso de teste');
     fireEvent.click(deleteButton);
     await waitFor(() => {
       expect(defaultStore.deleteTestCase).toHaveBeenCalledWith('1', true);
@@ -182,12 +182,12 @@ describe('TestManagement Component', () => {
     defaultStore.cloudTests = [];
     render(<TestManagement />);
     fireEvent.click(screen.getByText('Local Test'));
-    const duplicateButton = screen.getByTitle('Duplicate test case');
+    const duplicateButton = screen.getByTitle('Duplicar caso de teste');
     fireEvent.click(duplicateButton);
     await waitFor(() => {
       expect(defaultStore.addTestCase).toHaveBeenCalled();
     });
-    const deleteButtons = screen.getAllByTitle('Delete test case');
+    const deleteButtons = screen.getAllByTitle('Excluir caso de teste');
     fireEvent.click(deleteButtons[0]);
     await waitFor(() => {
       expect(defaultStore.deleteTestCase).toHaveBeenCalledWith('10', false);
@@ -220,7 +220,7 @@ describe('TestManagement Component', () => {
     const localTestElement = screen.getByText('Existing Local Test');
     const localTestContainer = localTestElement.parentElement;
     if (!localTestContainer) throw new Error('Local test container not found');
-    const editButton = localTestContainer.querySelector('button[title="Edit test case"]');
+    const editButton = localTestContainer.querySelector('button[title="Editar caso de teste"]');
     if (!editButton) throw new Error('Edit button not found');
     fireEvent.click(editButton);
     await waitFor(() => {
@@ -248,8 +248,8 @@ describe('TestManagement Component', () => {
     };
     render(<TestManagement />);
     expect(screen.getByText('Recording Test')).toBeDefined();
-    expect(screen.getByText('Recording in progress...')).toBeDefined();
-    const concludeButton = screen.getByText('Conclude & Save Test');
+    expect(screen.getByText('Gravação em andamento...')).toBeDefined();
+    const concludeButton = screen.getByText('Concluir & Salvar Teste');
     fireEvent.click(concludeButton);
     await waitFor(() => {
       expect(defaultStore.addTestCase).toHaveBeenCalledWith(

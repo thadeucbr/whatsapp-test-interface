@@ -29,8 +29,8 @@ describe('AIAnalysis Component', () => {
 
     render(<AIAnalysis />);
 
-    expect(screen.getByText('AI Conversation Analysis')).toBeInTheDocument();
-    expect(screen.getByText('Start Analysis')).toBeInTheDocument();
+    expect(screen.getByText('Análise de Conversa de IA')).toBeInTheDocument();
+    expect(screen.getByText('Iniciar Análise')).toBeInTheDocument();
     expect(screen.getByTestId('chat-panel')).toBeInTheDocument();
   });
 
@@ -42,7 +42,7 @@ describe('AIAnalysis Component', () => {
 
     render(<AIAnalysis />);
 
-    const button = screen.getByText('Start Analysis') as HTMLButtonElement;
+    const button = screen.getByText('Iniciar Análise') as HTMLButtonElement;
     expect(button).toBeDisabled();
   });
 
@@ -65,27 +65,27 @@ describe('AIAnalysis Component', () => {
     const mockAnalysis = {
       ratings: [
         {
-          category: 'Ease of Use',
+          category: 'Facilidade de Uso',
           score: 4,
           justification: 'The interface is intuitive.',
         },
         {
-          category: 'Persona Consistency',
+          category: 'Consistência da Persona',
           score: 5,
           justification: 'Consistent responses.',
         },
         {
-          category: 'Writing Quality',
+          category: 'Qualidade da Escrita',
           score: 4.5,
           justification: 'Well-written messages.',
         },
         {
-          category: 'Overall',
+          category: 'Geral',
           score: 4.5,
-          justification: 'Good overall performance.',
+          justification: 'Bom desempenho geral.',
         },
       ],
-      suggestions: ['Improve response time.', 'Add more interactive options.'],
+      suggestions: ['Melhorar o tempo de resposta.', 'Adicionar mais opções interativas.'],
     };
 
     mockUseStore.mockReturnValue({
@@ -97,15 +97,15 @@ describe('AIAnalysis Component', () => {
 
     render(<AIAnalysis />);
 
-    const button = screen.getByText('Start Analysis');
+    const button = screen.getByText('Iniciar Análise');
     fireEvent.click(button);
 
     expect(button).toBeDisabled();
-    expect(button).toHaveTextContent('Analyzing...');
+    expect(button).toHaveTextContent('Analisando...');
 
     await waitFor(() => {
-      expect(screen.getByText('Analysis Results')).toBeInTheDocument();
-      expect(screen.getByText('Suggestions for Improvement')).toBeInTheDocument();
+      expect(screen.getByText('Resultados da Análise')).toBeInTheDocument();
+      expect(screen.getByText('Sugestões para Melhoria')).toBeInTheDocument();
     });
 
     // Check ratings
@@ -123,7 +123,7 @@ describe('AIAnalysis Component', () => {
     });
 
     expect(button).not.toBeDisabled();
-    expect(button).toHaveTextContent('Start Analysis');
+    expect(button).toHaveTextContent('Iniciar Análise');
   });
 
   test('shows error alert on API failure', async () => {
@@ -151,18 +151,18 @@ describe('AIAnalysis Component', () => {
 
     render(<AIAnalysis />);
 
-    const button = screen.getByText('Start Analysis');
+    const button = screen.getByText('Iniciar Análise');
     fireEvent.click(button);
 
     expect(button).toBeDisabled();
-    expect(button).toHaveTextContent('Analyzing...');
+    expect(button).toHaveTextContent('Analisando...');
 
     await waitFor(() => {
-      expect(alertMock).toHaveBeenCalledWith('An error occurred while analyzing the conversation.');
+      expect(alertMock).toHaveBeenCalledWith('Ocorreu um erro ao analisar a conversa.');
     });
 
     expect(button).not.toBeDisabled();
-    expect(button).toHaveTextContent('Start Analysis');
+    expect(button).toHaveTextContent('Iniciar Análise');
 
     // Restore console.error
     consoleErrorSpy.mockRestore();

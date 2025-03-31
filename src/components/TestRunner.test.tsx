@@ -82,35 +82,35 @@ describe('TestRunner Component', () => {
 
   it('renders TestRunner component', () => {
     render(<TestRunner />);
-    expect(screen.getByText('Test Runner')).toBeInTheDocument();
+    expect(screen.getByText('Executor de Testes')).toBeInTheDocument();
     expect(screen.getByText('Sample Test')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /run/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /executar/i })).toBeInTheDocument();
   });
 
-  it('disables Run button when not connected', () => {
+  it('disables Executar button when not connected', () => {
     act(() => {
       mockStore.connected = false;
     });
     render(<TestRunner />);
     const runButton = screen.getByRole('button', {
-      name: /run/i,
+      name: /executar/i,
     }) as HTMLButtonElement;
     expect(runButton).toBeDisabled();
   });
 
   it('runs a test and sends the first interaction message', () => {
     render(<TestRunner />);
-    const runButton = screen.getByRole('button', { name: /run/i });
+    const runButton = screen.getByRole('button', { name: /executar/i });
     fireEvent.click(runButton);
     expect(mockSendMessage).toHaveBeenCalledWith('Hello');
     expect(
-      screen.getByText(/Running interaction 1 of 1, response 1 of 1\.\.\./i)
+      screen.getByText(/Executando interação 1 de 1, resposta 1 de 1\.\.\./i)
     ).toBeInTheDocument();
   });
 
   it('displays test results after receiving messages', async () => {
     const { rerender } = render(<TestRunner />);
-    const runButton = screen.getByRole('button', { name: /run/i });
+    const runButton = screen.getByRole('button', { name: /executar/i });
     fireEvent.click(runButton);
     expect(mockSendMessage).toHaveBeenCalledWith('Hello');
 
@@ -129,8 +129,8 @@ describe('TestRunner Component', () => {
 
     rerender(<TestRunner />);
     await waitFor(() => {
-      expect(screen.getByText('Test Results')).toBeInTheDocument();
-      expect(screen.getByText(/Success/i)).toBeInTheDocument();
+      expect(screen.getByText('Resultados do Teste')).toBeInTheDocument();
+      expect(screen.getByText(/Sucesso/i)).toBeInTheDocument();
     });
   });
 
@@ -160,7 +160,7 @@ describe('TestRunner Component', () => {
     });
 
     const { rerender } = render(<TestRunner />);
-    const runButton = screen.getByRole('button', { name: /run/i });
+    const runButton = screen.getByRole('button', { name: /executar/i });
     fireEvent.click(runButton);
     expect(mockSendMessage).toHaveBeenCalledWith('Hello');
 
@@ -195,8 +195,8 @@ describe('TestRunner Component', () => {
 
     rerender(<TestRunner />);
     await waitFor(() => {
-      expect(screen.getByText(/Test Results/i)).toBeInTheDocument();
-      expect(screen.getAllByText(/Success/i)).toHaveLength(2);
+      expect(screen.getByText(/Resultados do Teste/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/Sucesso/i)).toHaveLength(2);
     });
   });
 });

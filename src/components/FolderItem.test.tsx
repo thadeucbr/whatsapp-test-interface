@@ -67,7 +67,7 @@ describe('FolderItem Component', () => {
       );
     });
 
-    const renameButton = screen.getByTitle('Rename folder');
+    const renameButton = screen.getByTitle('Renomear pasta');
     await act(async () => {
       await userEvent.click(renameButton);
     });
@@ -82,7 +82,7 @@ describe('FolderItem Component', () => {
     expect(onRename).toHaveBeenCalledWith('folder1', 'New Folder');
   });
 
-  it('calls onAddSubfolder when clicking Add Subfolder button', async () => {
+  it('calls onAddSubfolder when clicking Adicionar Subpasta button', async () => {
     await act(async () => {
       render(
         <FolderItem
@@ -102,7 +102,7 @@ describe('FolderItem Component', () => {
       );
     });
 
-    const addSubfolderButton = screen.getByTitle('Add Subfolder');
+    const addSubfolderButton = screen.getByTitle('Adicionar Subpasta');
     await act(async () => {
       await userEvent.click(addSubfolderButton);
     });

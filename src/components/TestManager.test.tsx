@@ -36,8 +36,8 @@ describe('TestManager', () => {
         <TestManager />
       </MemoryRouter>
     );
-    expect(screen.getByText('Local Tests')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Search tests...')).toBeInTheDocument();
+    expect(screen.getByText('Testes Locais')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Pesquisar testes...')).toBeInTheDocument();
   });
 
   it('renders no tests message when testCases array is empty', () => {
@@ -46,7 +46,7 @@ describe('TestManager', () => {
         <TestManager />
       </MemoryRouter>
     );
-    expect(screen.getByText('No local tests found')).toBeInTheDocument();
+    expect(screen.getByText('Nenhum teste local encontrado')).toBeInTheDocument();
   });
 
   it('filters test cases based on search term', () => {
@@ -70,15 +70,15 @@ describe('TestManager', () => {
     );
     expect(screen.getByText('Alpha')).toBeInTheDocument();
     expect(screen.getByText('Beta')).toBeInTheDocument();
-    fireEvent.change(screen.getByPlaceholderText('Search tests...'), {
+    fireEvent.change(screen.getByPlaceholderText('Pesquisar testes...'), {
       target: { value: 'Alpha' },
     });
     expect(screen.getByText('Alpha')).toBeInTheDocument();
     expect(screen.queryByText('Beta')).not.toBeInTheDocument();
-    fireEvent.change(screen.getByPlaceholderText('Search tests...'), {
+    fireEvent.change(screen.getByPlaceholderText('Pesquisar testes...'), {
       target: { value: 'Gamma' },
     });
-    expect(screen.getByText('No local tests found')).toBeInTheDocument();
+    expect(screen.getByText('Nenhum teste local encontrado')).toBeInTheDocument();
   });
 
   it('calls setCurrentTestId when a test case is clicked', () => {
@@ -112,7 +112,7 @@ describe('TestManager', () => {
         <TestManager />
       </MemoryRouter>
     );
-    const deleteButton = screen.getByTitle('Delete test case');
+    const deleteButton = screen.getByTitle('Excluir caso de teste');
     fireEvent.click(deleteButton);
     expect(mockStore.deleteTestCase).toHaveBeenCalledWith('1');
   });

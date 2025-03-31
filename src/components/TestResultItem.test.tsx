@@ -22,7 +22,7 @@ describe('TestResultItem', () => {
     expect(successIcon).toBeInTheDocument();
 
     // Ensure the success text is present
-    expect(screen.getByText('Interaction 1, Response 2: Success')).toBeInTheDocument();
+    expect(screen.getByText('Interação 1, Resposta 2: Sucesso')).toBeInTheDocument();
   });
 
   it('renders correctly when the result is a failure', () => {
@@ -30,7 +30,7 @@ describe('TestResultItem', () => {
       success: false,
       interactionIndex: 1,
       responseIndex: 0,
-      error: 'Some error occurred',
+      error: 'Algum erro ocorreu',
       details: [
         {
           field: 'username',
@@ -50,16 +50,16 @@ describe('TestResultItem', () => {
     expect(failureIcon).toBeInTheDocument();
 
     // Ensure the failure text is present
-    expect(screen.getByText('Interaction 2, Response 1: Failed')).toBeInTheDocument();
+    expect(screen.getByText('Interação 2, Resposta 1: Falhou')).toBeInTheDocument();
 
     // Check for the error message
-    expect(screen.getByText('Some error occurred')).toBeInTheDocument();
+    expect(screen.getByText('Algum erro ocorreu')).toBeInTheDocument();
 
     // Check for the detail fields and values
     expect(screen.getByText('username:')).toBeInTheDocument();
-    expect(screen.getByText('Expected:')).toBeInTheDocument();
+    expect(screen.getByText('Esperado:')).toBeInTheDocument();
     expect(screen.getByText('user123')).toBeInTheDocument();
-    expect(screen.getByText('Received:')).toBeInTheDocument();
+    expect(screen.getByText('Recebido:')).toBeInTheDocument();
     expect(screen.getByText('user456')).toBeInTheDocument();
   });
 
@@ -72,8 +72,8 @@ describe('TestResultItem', () => {
     render(<TestResultItem result={testResult} />);
 
     // Ensure that error-related texts are not present
-    expect(screen.queryByText('Expected:')).not.toBeInTheDocument();
-    expect(screen.queryByText('Received:')).not.toBeInTheDocument();
+    expect(screen.queryByText('Esperado:')).not.toBeInTheDocument();
+    expect(screen.queryByText('Recebido:')).not.toBeInTheDocument();
     expect(screen.queryByText('error')).not.toBeInTheDocument();
     expect(screen.queryByText('Unknown error')).not.toBeInTheDocument();
   });
@@ -83,7 +83,7 @@ describe('TestResultItem', () => {
       success: false,
       interactionIndex: 2,
       responseIndex: 3,
-      error: 'Multiple errors occurred',
+      error: 'Vários erros ocorreram',
       details: [
         {
           field: 'email',
@@ -103,9 +103,9 @@ describe('TestResultItem', () => {
     expect(screen.getByText('email:')).toBeInTheDocument();
     expect(screen.getByText('password:')).toBeInTheDocument();
 
-    // Using getAllByText to handle multiple 'Expected:' and 'Received:' texts
-    const expectedElements = screen.getAllByText('Expected:');
-    const receivedElements = screen.getAllByText('Received:');
+    // Using getAllByText to handle multiple 'Esperado:' and 'Recebido:' texts
+    const expectedElements = screen.getAllByText('Esperado:');
+    const receivedElements = screen.getAllByText('Recebido:');
 
     expect(expectedElements).toHaveLength(2);
     expect(receivedElements).toHaveLength(2);
@@ -121,7 +121,7 @@ describe('TestResultItem', () => {
       success: false,
       interactionIndex: 3,
       responseIndex: 2,
-      error: 'Unknown error',
+      error: 'Erro desconhecido',
       details: undefined,
     };
     const { container } = render(<TestResultItem result={testResult} />);
@@ -133,12 +133,12 @@ describe('TestResultItem', () => {
     // Ensure that the error message is present using a function matcher
     expect(
       screen.getByText((content, element) => {
-        return content.includes('Unknown error') && element?.tagName.toLowerCase() === 'p';
+        return content.includes('Erro desconhecido') && element?.tagName.toLowerCase() === 'p';
       })
     ).toBeInTheDocument();
 
     // Ensure that error-related detail texts are not present
-    expect(screen.queryByText('Expected:')).not.toBeInTheDocument();
-    expect(screen.queryByText('Received:')).not.toBeInTheDocument();
+    expect(screen.queryByText('Esperado:')).not.toBeInTheDocument();
+    expect(screen.queryByText('Recebido:')).not.toBeInTheDocument();
   });
 });

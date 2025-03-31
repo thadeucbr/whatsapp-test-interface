@@ -29,9 +29,9 @@ describe('TestPreviewPanel', () => {
     const onSave = vi.fn();
     const onCancel = vi.fn();
     render(<TestPreviewPanel test={test} onSave={onSave} onCancel={onCancel} />);
-    expect(screen.getByPlaceholderText('Enter test name...')).toBeInTheDocument();
-    expect(screen.getByText('Save Test')).toBeInTheDocument();
-    expect(screen.getByText('Cancel')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Digite o nome do teste...')).toBeInTheDocument();
+    expect(screen.getByText('Salvar Teste')).toBeInTheDocument();
+    expect(screen.getByText('Cancelar')).toBeInTheDocument();
   });
 
   it('updates test name and calls onSave with updated test', () => {
@@ -39,9 +39,9 @@ describe('TestPreviewPanel', () => {
     const onSave = vi.fn();
     const onCancel = vi.fn();
     render(<TestPreviewPanel test={test} onSave={onSave} onCancel={onCancel} />);
-    const nameInput = screen.getByPlaceholderText('Enter test name...');
+    const nameInput = screen.getByPlaceholderText('Digite o nome do teste...');
     fireEvent.change(nameInput, { target: { value: 'Updated Name' } });
-    const saveButton = screen.getByText('Save Test');
+    const saveButton = screen.getByText('Salvar Teste');
     fireEvent.click(saveButton);
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ name: 'Updated Name' }));
   });
@@ -51,7 +51,7 @@ describe('TestPreviewPanel', () => {
     const onSave = vi.fn();
     const onCancel = vi.fn();
     render(<TestPreviewPanel test={test} onSave={onSave} onCancel={onCancel} />);
-    const cancelButton = screen.getByText('Cancel');
+    const cancelButton = screen.getByText('Cancelar');
     fireEvent.click(cancelButton);
     expect(onCancel).toHaveBeenCalled();
   });
@@ -61,7 +61,7 @@ describe('TestPreviewPanel', () => {
     const onSave = vi.fn();
     const onCancel = vi.fn();
     render(<TestPreviewPanel test={test} onSave={onSave} onCancel={onCancel} />);
-    const input = screen.getByPlaceholderText('Type user message...');
+    const input = screen.getByPlaceholderText('Digite a mensagem do usuário...');
     fireEvent.change(input, { target: { value: 'Hello World' } });
     fireEvent.keyDown(input, { key: 'Enter', code: 'Enter', charCode: 13 });
     expect(screen.getByText('Hello World')).toBeInTheDocument();
@@ -79,7 +79,7 @@ describe('TestPreviewPanel', () => {
     const editButton = groupContainer!.querySelector('button > svg.lucide-pen')?.closest('button');
     expect(editButton).toBeDefined();
     fireEvent.click(editButton!);
-    const userInput = screen.getByPlaceholderText('Edit user message...');
+    const userInput = screen.getByPlaceholderText('Editar mensagem do usuário...');
     fireEvent.change(userInput, { target: { value: 'Edited Message' } });
     fireEvent.keyDown(userInput, { key: 'Enter', code: 'Enter', charCode: 13 });
     expect(screen.getByText('Edited Message')).toBeInTheDocument();

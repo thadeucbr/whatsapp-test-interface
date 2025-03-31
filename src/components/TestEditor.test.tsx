@@ -27,7 +27,7 @@ describe('TestEditor', () => {
     const nameInput = screen.getByDisplayValue('Test Case 1') as HTMLInputElement;
     expect(nameInput.value).to.equal('Test Case 1');
     // Verifica se o título indica que é edição
-    expect(screen.getByText('Edit Test Case')).toBeInTheDocument();
+    expect(screen.getByText('Editar Caso de Teste')).toBeInTheDocument();
     // Verifica se a interação está renderizada com o userMessage 'Hello'
     const interactionInput = screen.getByDisplayValue('Hello') as HTMLTextAreaElement;
     expect(interactionInput.value).to.equal('Hello');
@@ -40,10 +40,10 @@ describe('TestEditor', () => {
       <TestEditor testCase={null} onSave={mockOnSave} onCancel={mockOnCancel} />
     );
     // Input do nome deve estar vazio
-    const nameInput = screen.getByPlaceholderText('Enter test case name') as HTMLInputElement;
+    const nameInput = screen.getByPlaceholderText('Digite o nome do caso de teste') as HTMLInputElement;
     expect(nameInput.value).to.equal('');
-    // Título deve indicar "New Test Case"
-    expect(screen.getByText('New Test Case')).toBeInTheDocument();
+    // Título deve indicar "Novo Caso de Teste"
+    expect(screen.getByText('Novo Caso de Teste')).toBeInTheDocument();
   });
 
   it('calls onCancel when the cancel button is clicked', async () => {
@@ -53,9 +53,9 @@ describe('TestEditor', () => {
       <TestEditor testCase={testCaseMock} onSave={mockOnSave} onCancel={mockOnCancel} />
     );
     // O botão de cancel é o que contém o ícone ArrowLeft.
-    // Como esse botão não possui texto, buscamos pelo primeiro botão que não contenha "Save".
+    // Como esse botão não possui texto, buscamos pelo primeiro botão que não contenha "Salvar".
     const buttons = screen.getAllByRole('button');
-    const cancelButton = buttons.find((btn) => !btn.textContent?.includes('Save'));
+    const cancelButton = buttons.find((btn) => !btn.textContent?.includes('Salvar'));
     expect(cancelButton).toBeInTheDocument();
     await act(async () => {
       fireEvent.click(cancelButton!);
@@ -63,19 +63,19 @@ describe('TestEditor', () => {
     expect(mockOnCancel).toHaveBeenCalled();
   });
 
-  it('adds a new interaction when "Add Interaction" is clicked', async () => {
+  it('adds a new interaction when "Adicionar Interação" is clicked', async () => {
     const mockOnSave = vi.fn();
     const mockOnCancel = vi.fn();
     render(
       <TestEditor testCase={testCaseMock} onSave={mockOnSave} onCancel={mockOnCancel} />
     );
-    const addInteractionButton = screen.getByText('Add Interaction');
+    const addInteractionButton = screen.getByText('Adicionar Interação');
     await act(async () => {
       fireEvent.click(addInteractionButton);
     });
-    // Contamos apenas os headings (h4) que contenham exatamente "Interaction" seguido por um número.
+    // Contamos apenas os headings (h4) que contenham exatamente "Interação" seguido por um número.
     const interactionHeadings = screen.getAllByText((content, element) => {
-      return element?.tagName.toLowerCase() === 'h4' && /^Interaction \d+$/.test(content);
+      return element?.tagName.toLowerCase() === 'h4' && /^Interação \d+$/.test(content);
     });
     // Como o testCaseMock possui uma interação e adicionamos uma, esperamos 2 interações.
     expect(interactionHeadings.length).to.equal(2);
@@ -109,29 +109,29 @@ describe('TestEditor', () => {
     await act(async () => {
       fireEvent.click(deleteButtons[0]);
     });
-    // Após a exclusão, não devem existir headings com "Interaction X"
+    // Após a exclusão, não devem existir headings com "Interação X"
     const interactionHeadings = screen.queryAllByText((content, element) => {
-      return element?.tagName.toLowerCase() === 'h4' && /^Interaction \d+$/.test(content);
+      return element?.tagName.toLowerCase() === 'h4' && /^Interação \d+$/.test(content);
     });
     expect(interactionHeadings.length).to.equal(0);
   });
 
-  it('adds a new response to an interaction when "Add Response" is clicked', async () => {
+  it('adds a new response to an interaction when "Adicionar Resposta" is clicked', async () => {
     const mockOnSave = vi.fn();
     const mockOnCancel = vi.fn();
     render(
       <TestEditor testCase={testCaseMock} onSave={mockOnSave} onCancel={mockOnCancel} />
     );
-    const addResponseButton = screen.getByText('Add Response');
+    const addResponseButton = screen.getByText('Adicionar Resposta');
     await act(async () => {
       fireEvent.click(addResponseButton);
     });
-    // O novo response é renderizado via ResponseEditor; verificamos se o textarea com placeholder "Enter message text" aparece.
-    const responseTextArea = await screen.findByPlaceholderText('Enter message text');
+    // O novo response é renderizado via ResponseEditor; verificamos se o textarea com placeholder "Digite o texto da mensagem" aparece.
+    const responseTextArea = await screen.findByPlaceholderText('Digite o texto da mensagem');
     expect(responseTextArea).toBeInTheDocument();
   });
 
-  it('calls onSave with updated test case when Save is clicked', async () => {
+  it('calls onSave with updated test case when Salvar is clicked', async () => {
     const mockOnSave = vi.fn();
     const mockOnCancel = vi.fn();
     render(
@@ -142,8 +142,8 @@ describe('TestEditor', () => {
     await act(async () => {
       fireEvent.change(nameInput, { target: { value: 'Updated Test Case' } });
     });
-    // Clica no botão Save (que contém o texto "Save")
-    const saveButton = screen.getByText('Save');
+    // Clica no botão Salvar (que contém o texto "Salvar")
+    const saveButton = screen.getByText('Salvar');
     await act(async () => {
       fireEvent.click(saveButton);
     });

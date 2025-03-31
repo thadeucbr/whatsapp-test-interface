@@ -48,7 +48,7 @@ describe('PhoneSelector Component', () => {
     });
 
     render(<PhoneSelector />);
-    expect(screen.getByText('Select Phone Number')).toBeInTheDocument();
+    expect(screen.getByText('Selecionar Número de Telefone')).toBeInTheDocument();
     const select = screen.getByRole('combobox');
     expect(select).toHaveValue('551126509993@c.us');
     expect(screen.getByText('Beta Institucional PF (1126509993)')).toBeInTheDocument();

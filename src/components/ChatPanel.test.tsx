@@ -40,10 +40,10 @@ describe('ChatPanel Component', () => {
 
   it('renders Chat Preview header and only filtered messages', () => {
     render(<ChatPanel />);
-    expect(screen.getByText('Chat Preview')).toBeInTheDocument();
+    expect(screen.getByText('Pré-visualização do Chat')).toBeInTheDocument();
     expect(screen.getByText('Test Message')).toBeInTheDocument();
     expect(screen.queryByText('Other Message')).not.toBeInTheDocument();
-    expect(screen.getByText(/Showing messages for: 123/)).toBeInTheDocument();
+    expect(screen.getByText(/Mostrando mensagens para: 123/)).toBeInTheDocument();
   });
 
   it('calls scrollIntoView after rendering messages', () => {
@@ -60,7 +60,7 @@ describe('ChatPanel Component', () => {
       return selector(state);
     });
     render(<ChatPanel />);
-    const input = screen.getByPlaceholderText('Type a message...');
+    const input = screen.getByPlaceholderText('Digite uma mensagem...');
     fireEvent.change(input, { target: { value: 'Hello World' } });
     expect(input).toHaveValue('Hello World');
     fireEvent.submit(input.closest('form')!);

@@ -28,10 +28,10 @@ describe('ResponseEditor', () => {
       />
     );
 
-    const textArea = screen.getByPlaceholderText('Enter message text') as HTMLTextAreaElement;
+    const textArea = screen.getByPlaceholderText('Digite o texto da mensagem') as HTMLTextAreaElement;
     expect(textArea.value).to.equal('Texto inicial');
 
-    const select = screen.getByLabelText('Response Type') as HTMLSelectElement;
+    const select = screen.getByLabelText('Tipo de Resposta') as HTMLSelectElement;
     expect(select.value).to.equal('text');
   });
 
@@ -46,7 +46,7 @@ describe('ResponseEditor', () => {
       />
     );
 
-    const textArea = screen.getByPlaceholderText('Enter message text') as HTMLTextAreaElement;
+    const textArea = screen.getByPlaceholderText('Digite o texto da mensagem') as HTMLTextAreaElement;
     await act(async () => {
       userEvent.clear(textArea);
       await userEvent.type(textArea, 'Texto atualizado');
@@ -98,11 +98,11 @@ describe('ResponseEditor', () => {
     );
 
     await act(async () => {
-      const addOptionButton = screen.getByTitle('Add option');
+      const addOptionButton = screen.getByTitle('Adicionar opção');
       fireEvent.click(addOptionButton);
     });
 
-    const optionInput = await screen.findByPlaceholderText('Button text');
+    const optionInput = await screen.findByPlaceholderText('Texto do botão');
     expect(optionInput).toBeInTheDocument();
 
     await act(async () => {
@@ -145,10 +145,10 @@ describe('ResponseEditor', () => {
       />
     );
 
-    const select = screen.getByLabelText('Response Type') as HTMLSelectElement;
+    const select = screen.getByLabelText('Tipo de Resposta') as HTMLSelectElement;
     expect(select.value).to.equal('list');
 
-    const buttonTextInput = screen.getByPlaceholderText('Enter button text') as HTMLInputElement;
+    const buttonTextInput = screen.getByPlaceholderText('Digite o texto do botão') as HTMLInputElement;
     expect(buttonTextInput).toBeInTheDocument();
 
     await act(async () => {
@@ -184,12 +184,12 @@ describe('ResponseEditor', () => {
     );
 
     await act(async () => {
-      const addOptionButton = screen.getByTitle('Add option');
+      const addOptionButton = screen.getByTitle('Adicionar opção');
       fireEvent.click(addOptionButton);
     });
 
-    const nameInput = await screen.findByPlaceholderText('Name');
-    const displayTextInput = screen.getByPlaceholderText('Display Text');
+    const nameInput = await screen.findByPlaceholderText('Nome');
+    const displayTextInput = screen.getByPlaceholderText('Texto de Exibição');
     const urlInput = screen.getByPlaceholderText('URL');
 
     await act(async () => {
