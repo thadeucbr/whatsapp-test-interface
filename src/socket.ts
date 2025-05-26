@@ -1,7 +1,7 @@
 import { io } from 'socket.io-client';
 import { useStore } from './store';
 
-const socket = io('https://whatsappapi.barbudas.com');
+const socket = io(import.meta.env.VITE_SOCKET_URL);
 
 socket.on('connect', () => {
   useStore.getState().setConnected(true);

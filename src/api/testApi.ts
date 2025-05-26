@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { TestCase } from '../types';
 
-const API_BASE_URL = 'https://whatsappapi.barbudas.com/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const fetchCloudTests = async (): Promise<TestCase[]> => {
   try {
